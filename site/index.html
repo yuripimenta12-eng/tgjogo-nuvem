@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Número da Sorte · Copa TGJOGO</title>
 <style>
-  /* ============================================================
-     CONFIG: troque a linha API_BASE no <script> pelo endereco do
-     seu backend quando publicar. Em teste local: http://localhost:3000
-     ============================================================ */
   :root{
     --pitch:#0b3d2e; --pitch-2:#0f5138; --gold:#ffd84d; --gold-2:#f5a623;
     --livre:#2e9e5b; --conf:#c0392b; --ink:#0a2a20; --paper:#f7faf8; --muted:#9fc4b3;
@@ -55,6 +51,27 @@
   .resumo strong{color:#fff}
   .hidden{display:none!important}
   footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted)}
+
+  /* Regulamento accordion */
+  .rules-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;margin-top:18px;overflow:hidden}
+  .rules-toggle{width:100%;background:none;border:none;color:var(--paper);font-family:inherit;font-size:15px;font-weight:700;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:0}
+  .rules-toggle:hover{background:rgba(255,255,255,.05)}
+  .rules-toggle .arrow{transition:transform .25s;font-size:13px;color:var(--gold)}
+  .rules-toggle.open .arrow{transform:rotate(180deg)}
+  .rules-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+  .rules-body.open{max-height:5000px}
+  .rules-content{padding:4px 22px 22px;font-size:13px;color:#d7ece1;line-height:1.75}
+  .rules-content h3{font-size:12px;font-weight:800;color:var(--gold);margin:16px 0 5px;text-transform:uppercase;letter-spacing:.07em}
+  .rules-content p{margin-bottom:8px}
+  .rules-content ol,.rules-content ul{padding-left:18px;margin-bottom:8px}
+  .rules-content li{margin-bottom:3px}
+
+  /* Checkbox aceite */
+  .agree-wrap{display:flex;align-items:flex-start;gap:12px;margin-top:18px;padding:14px 16px;background:rgba(255,216,77,.06);border:1px solid rgba(255,216,77,.25);border-radius:12px;cursor:pointer;transition:background .15s}
+  .agree-wrap:hover{background:rgba(255,216,77,.10)}
+  .agree-check{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--gold);cursor:pointer}
+  .agree-label{font-size:13px;color:#d7ece1;cursor:pointer;line-height:1.5;margin:0}
+  .agree-label strong{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -64,6 +81,75 @@
     <h1><span class="trophy">🏆</span> Número da Sorte<br/>Copa TGJOGO</h1>
     <p>Escolha seu número da sorte e participe do sorteio especial da Copa!</p>
   </header>
+
+  <!-- REGULAMENTO -->
+  <div class="rules-card">
+    <button class="rules-toggle" id="rulesToggle" onclick="toggleRules()">
+      📋 Regulamento do Evento
+      <span class="arrow">▼</span>
+    </button>
+    <div class="rules-body" id="rulesBody">
+      <div class="rules-content">
+
+        <h3>1. Sobre o Evento</h3>
+        <p>O evento "Número da Sorte Copa TGJOGO" é uma ação promocional criada para os jogadores da TGJOGO durante o período da Copa. O participante poderá escolher um número disponível no site oficial do evento, informar seus dados corretamente e confirmar sua participação no sorteio.</p>
+
+        <h3>2. Como Participar</h3>
+        <p>Para participar, o jogador deverá:</p>
+        <ol>
+          <li>Acessar o site oficial do evento;</li>
+          <li>Escolher um número disponível;</li>
+          <li>Informar corretamente o ID da sua conta TGJOGO;</li>
+          <li>Informar o nome completo;</li>
+          <li>Informar corretamente o @ do Telegram;</li>
+          <li>Confirmar a participação;</li>
+          <li>Aguardar a confirmação do registro.</li>
+        </ol>
+        <p>O nome completo, o ID TGJOGO e o @ do Telegram deverão estar corretos para que a equipe consiga validar as informações do participante. Após a confirmação no site, o número escolhido ficará vinculado ao ID informado. O participante será direcionado para um link do Telegram para confirmar e salvar suas informações.</p>
+
+        <h3>3. Limite de Participação</h3>
+        <p>Cada ID de jogador poderá escolher apenas <strong>1 número</strong> durante a campanha. Caso seja identificado que o mesmo jogador tentou participar usando múltiplos IDs, contas duplicadas, informações falsas ou qualquer tentativa de fraude, a participação poderá ser cancelada pela equipe da TGJOGO.</p>
+
+        <h3>4. Escolha do Número</h3>
+        <p>Os números serão disponibilizados no site oficial do evento. Após o jogador escolher e confirmar um número, esse número ficará reservado para o ID informado. Números já escolhidos por outros participantes não poderão ser selecionados novamente e ficarão marcados em <strong style="color:var(--conf)">vermelho</strong> no site.</p>
+
+        <h3>5. Informações Incorretas</h3>
+        <p>O jogador é responsável por informar corretamente todos os dados solicitados, incluindo ID TGJOGO, nome completo e @ do Telegram. Caso as informações estejam incorretas, incompletas ou inválidas, a participação poderá ser cancelada. A TGJOGO não se responsabiliza por erros causados pelo preenchimento incorreto dos dados.</p>
+
+        <h3>6. Confirmação da Participação</h3>
+        <p>Após a escolha do número e envio das informações, a participação será registrada automaticamente no sistema da campanha. A equipe da TGJOGO poderá verificar os dados antes da confirmação final. Somente números registrados, válidos e vinculados corretamente ao ID do participante estarão aptos para o sorteio.</p>
+
+        <h3>7. Sorteio</h3>
+        <p>O sorteio será realizado na data e horário informados pela TGJOGO nos canais oficiais. O número vencedor será divulgado no Telegram oficial da TGJOGO ou em outro canal oficial informado pela equipe.</p>
+
+        <h3>8. Premiação</h3>
+        <p>A premiação será definida e divulgada pela TGJOGO antes da realização do sorteio. O prêmio será entregue somente ao jogador que tiver o ID corretamente vinculado ao número sorteado. A TGJOGO poderá solicitar confirmação dos dados do participante, incluindo verificação de depósito, caso necessário para validação.</p>
+
+        <h3>9. Desclassificação</h3>
+        <p>O participante poderá ser desclassificado caso seja identificado:</p>
+        <ul>
+          <li>Uso de ID falso, inválido ou pertencente a outro jogador;</li>
+          <li>Uso de nome completo incorreto ou incompatível com a conta;</li>
+          <li>Uso de @ do Telegram incorreto, falso ou pertencente a outra pessoa;</li>
+          <li>Tentativa de registrar mais de um número usando o mesmo ID;</li>
+          <li>Uso de múltiplas contas para obter vantagem;</li>
+          <li>Manipulação, fraude ou abuso da campanha;</li>
+          <li>Informações falsas, incompletas ou divergentes;</li>
+          <li>Qualquer atitude considerada irregular pela equipe da TGJOGO.</li>
+        </ul>
+
+        <h3>10. Alterações no Evento</h3>
+        <p>A TGJOGO poderá alterar datas, horários, regras, prêmios ou condições do evento caso seja necessário, sempre comunicando os participantes pelos canais oficiais.</p>
+
+        <h3>11. Aceitação das Regras</h3>
+        <p>Ao escolher um número e confirmar a participação, o jogador declara que leu, entendeu e concorda com todas as regras deste regulamento.</p>
+
+        <h3>12. Canais Oficiais</h3>
+        <p>Todas as informações sobre o evento, sorteio, resultados e premiações serão divulgadas nos canais oficiais da TGJOGO.</p>
+
+      </div>
+    </div>
+  </div>
 
   <section class="card" id="painel">
     <h2><span class="step-num">1</span> Escolha seu número</h2>
@@ -82,6 +168,15 @@
     <input type="text" id="nomeReal" placeholder="Ex: João da Silva" maxlength="60" autocomplete="off" />
     <label>Seu nome/usuário no Telegram</label>
     <input type="text" id="tgNome" placeholder="Ex: @joaosilva" maxlength="40" autocomplete="off" />
+
+    <!-- ACEITE DO REGULAMENTO -->
+    <div class="agree-wrap" id="agreeWrap" onclick="toggleAgree()">
+      <input type="checkbox" class="agree-check" id="agreeCheck" onclick="event.stopPropagation();valida()" />
+      <label class="agree-label" for="agreeCheck">
+        Li e concordo com o <strong>Regulamento do Número da Sorte Copa TGJOGO</strong>.
+        Declaro que todas as informações preenchidas são verdadeiras.
+      </label>
+    </div>
 
     <button class="btn-gold" id="btnConfirmar" disabled>✅ Confirmar participação</button>
     <div class="msg" id="msg"></div>
@@ -102,10 +197,21 @@
 </div>
 
 <script>
-  const API_BASE = ""; // mesmo endereco do servidor (na nuvem ou local)
+  const API_BASE = "";
   const $ = (id) => document.getElementById(id);
   let escolhido = null;
   let ocupados = {};
+
+  function toggleRules(){
+    $("rulesToggle").classList.toggle("open");
+    $("rulesBody").classList.toggle("open");
+  }
+
+  function toggleAgree(){
+    const cb = $("agreeCheck");
+    cb.checked = !cb.checked;
+    valida();
+  }
 
   function showMsg(t){ const m=$("msg"); m.textContent=t; m.className="msg erro"; }
   function limpaMsg(){ $("msg").className="msg"; }
@@ -144,7 +250,8 @@
     const id=$("playerId").value.trim();
     const nome=$("nomeReal").value.trim();
     const tg=$("tgNome").value.trim();
-    const ok = escolhido && id.length>=1 && id.length<=40 && nome.length>=3 && tg.length>=2;
+    const agree=$("agreeCheck").checked;
+    const ok = escolhido && id.length>=1 && id.length<=40 && nome.length>=3 && tg.length>=2 && agree;
     $("btnConfirmar").disabled = !ok;
   }
   ["playerId","nomeReal","tgNome"].forEach(id=>$(id).addEventListener("input",valida));
@@ -158,6 +265,7 @@
     if(playerId.length<1 || playerId.length>40){ showMsg("Informe seu ID de jogador."); return; }
     if(nomeReal.length<3){ showMsg("Informe seu nome real."); return; }
     if(telegramNome.length<2){ showMsg("Informe seu nome no Telegram."); return; }
+    if(!$("agreeCheck").checked){ showMsg("Você precisa aceitar o regulamento para participar."); return; }
 
     $("btnConfirmar").disabled=true; $("btnConfirmar").textContent="Confirmando...";
     try{
