@@ -1,13 +1,5 @@
 // ====================================================================
-//  NUMERO DA SORTE COPA TGJOGO  -  Backend + Bot Telegram
-// --------------------------------------------------------------------
-//  O que este arquivo faz:
-//   1. Sobe uma API que o site consome (ver grade, sortear, confirmar).
-//   2. Guarda as reservas num banco SQLite (arquivo local, simples).
-//   3. Avisa a SUA EQUIPE no Telegram a cada participacao.
-//   4. Mantem um bot que, quando o jogador aperta "Iniciar", manda a
-//      confirmacao no Telegram dele.
-//  Para rodar:  npm install  ->  npm start
+// NUMERO DA SORTE COPA TGJOGO - Backend + Bot Telegram
 // ====================================================================
 
 import express from "express";
@@ -30,6 +22,8 @@ const {
   PORT = 3000,
   ALLOWED_ORIGIN = "*",
   GRID_SIZE = 100,
+  UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN,
 } = process.env;
 
 const TOTAL = Number(GRID_SIZE);
@@ -40,72 +34,106 @@ if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("cole_o_token")) {
 }
 
 // --------------------------------------------------------------------
-//  ARMAZENAMENTO (arquivo JSON simples - sem banco pra compilar)
-//  Guarda as reservas em campanha.json. Para milhares de participacoes
-//  isso e mais que suficiente e funciona em qualquer sistema.
+// SANITIZACAO DE ENTRADA
 // --------------------------------------------------------------------
-const DB_FILE = "campanha.json";
+function sanitizar(s) {
+  if (typeof s !== "string") return "";
+  return s
+    .replace(/<[^>]*>/g, "")
+    .replace(/[<>&"']/g, "")
+    .replace(/[\x00-\x1F\x7F]/g, "")
+    .trim();
+}
 
-function carregarReservas() {
+// --------------------------------------------------------------------
+// ARMAZENAMENTO — Upstash Redis (permanente) ou arquivo JSON (local)
+// --------------------------------------------------------------------
+const DB_FILE  = "campanha.json";
+const REDIS_KEY = "tgjogo:reservas";
+const usandoRedis = !!(UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN);
+
+async function redisGet(key) {
+  const r = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
+  });
+  const json = await r.json();
+  return json.result ? JSON.parse(json.result) : null;
+}
+
+async function redisSet(key, value) {
+  await fetch(`${UPSTASH_REDIS_REST_URL}/set/${key}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(JSON.stringify(value)),
+  });
+}
+
+async function carregarReservas() {
+  if (usandoRedis) {
+    try {
+      const data = await redisGet(REDIS_KEY);
+      console.log("[Redis] Reservas carregadas:", (data || []).length);
+      return data || [];
+    } catch (e) {
+      console.error("[Redis] Erro ao carregar, usando arquivo local:", e.message);
+    }
+  }
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
   } catch {
-    return []; // arquivo ainda nao existe
+    return [];
   }
 }
-function salvarReservas(lista) {
+
+async function salvarReservas(lista) {
+  if (usandoRedis) {
+    try {
+      await redisSet(REDIS_KEY, lista);
+      return;
+    } catch (e) {
+      console.error("[Redis] Erro ao salvar, salvando em arquivo:", e.message);
+    }
+  }
   fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 }
 
-let reservas = carregarReservas(); // [{numero, player_id, status, claim_token, telegram_chat, criado_em}]
+let reservas = await carregarReservas();
+if (usandoRedis) {
+  console.log("[Storage] Usando Upstash Redis — dados persistentes.");
+} else {
+  console.warn("[Storage] Upstash nao configurado — usando arquivo local (dados perdidos no restart).");
+}
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
-const acharPorPlayer = (id) => reservas.find((r) => r.player_id === id);
-const acharPorToken = (t) => reservas.find((r) => r.claim_token === t);
+const acharPorPlayer = (id) =>
+  reservas.find((r) => r.player_id.toLowerCase() === id.toLowerCase());
+const acharPorToken  = (t) => reservas.find((r) => r.claim_token === t);
 
 // --------------------------------------------------------------------
-//  VALIDACOES
+// VALIDACOES
 // --------------------------------------------------------------------
-function idValido(playerId) {
-  // ID livre: aceita numeros, letras e simbolos. So nao pode ser vazio.
-  // Limite de 1 a 40 caracteres para evitar lixo/spam.
-  return typeof playerId === "string" && playerId.trim().length >= 1 && playerId.trim().length <= 40;
-}
-
-function numeroValido(n) {
-  return Number.isInteger(n) && n >= 1 && n <= TOTAL;
-}
-
-function nomeValido(s) {
-  return typeof s === "string" && s.trim().length >= 3 && s.trim().length <= 60;
-}
-
-function telegramValido(s) {
-  return typeof s === "string" && s.trim().length >= 2 && s.trim().length <= 40;
-}
-
-function numerosOcupados() {
-  return new Set(reservas.map((r) => r.numero));
-}
+function idValido(s)       { return typeof s === "string" && s.length >= 1 && s.length <= 40; }
+function numeroValido(n)   { return Number.isInteger(n) && n >= 1 && n <= TOTAL; }
+function nomeValido(s)     { return typeof s === "string" && s.length >= 3 && s.length <= 60; }
+function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
+function numerosOcupados() { return new Set(reservas.map((r) => r.numero)); }
 
 // --------------------------------------------------------------------
-//  BOT DO TELEGRAM
+// BOT DO TELEGRAM
 // --------------------------------------------------------------------
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
 const username = (await bot.getMe()).username;
 console.log(`Bot conectado: @${username}`);
 
-// Quando o jogador abre o link e aperta "Iniciar", chega aqui.
-// O link tera o formato: https://t.me/SEU_BOT?start=<claim_token>
 bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
   const chatId = msg.chat.id;
-  const token = match && match[1] ? match[1].trim() : null;
+  const token  = match && match[1] ? match[1].trim() : null;
 
   if (!token) {
-    bot.sendMessage(
-      chatId,
-      "Ola! Para receber a confirmacao do seu numero da sorte, use o botao que aparece no site depois de confirmar sua participacao."
-    );
+    bot.sendMessage(chatId, "Ola! Para receber a confirmacao do seu numero da sorte, use o botao que aparece no site depois de confirmar sua participacao.");
     return;
   }
 
@@ -119,29 +147,28 @@ bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
   salvarReservas(reservas);
 
   const numero = String(reserva.numero).padStart(2, "0");
-  bot.sendMessage(
-    chatId,
+  bot.sendMessage(chatId,
     `Participacao confirmada! 🍀\n\n` +
-      `🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
-      `🎟️ Seu numero: ${numero}\n` +
-      `🆔 ID do jogador: ${reserva.player_id}\n` +
-      `👤 Nome: ${reserva.nome_real}\n` +
-      `✅ Status: registrado\n\n` +
-      `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
+    `🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
+    `🎟️ Seu numero: ${numero}\n` +
+    `🆔 ID do jogador: ${reserva.player_id}\n` +
+    `👤 Nome: ${reserva.nome_real}\n` +
+    `✅ Status: registrado\n\n` +
+    `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
   );
 });
 
 function avisarEquipe(reserva) {
   if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) {
-    console.warn("[aviso] TELEGRAM_TEAM_CHAT_ID nao configurado - equipe nao sera notificada.");
+    console.warn("[aviso] TELEGRAM_TEAM_CHAT_ID nao configurado.");
     return;
   }
-  const agora = new Date();
-  const data = agora.toLocaleDateString("pt-BR");
-  const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const agora  = new Date();
+  const data   = agora.toLocaleDateString("pt-BR");
+  const hora   = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const numero = String(reserva.numero).padStart(2, "0");
 
-  const texto =
+  bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
     `🎟️ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
     `Numero escolhido: ${numero}\n` +
     `ID do jogador: ${reserva.player_id}\n` +
@@ -149,40 +176,40 @@ function avisarEquipe(reserva) {
     `Telegram: ${reserva.telegram_nome}\n` +
     `Status: Participacao registrada\n` +
     `Data: ${data}\n` +
-    `Hora: ${hora}`;
-
-  bot.sendMessage(TELEGRAM_TEAM_CHAT_ID, texto).catch((e) =>
-    console.error("Erro ao avisar equipe:", e.message)
-  );
+    `Hora: ${hora}`
+  ).catch((e) => console.error("Erro ao avisar equipe:", e.message));
 }
 
 // --------------------------------------------------------------------
-//  API
+// API
 // --------------------------------------------------------------------
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: ALLOWED_ORIGIN }));
-
-// Serve o site (pasta "site") na raiz, para ser um endereco unico na nuvem.
 app.use(express.static(path.join(__dirname, "site")));
 
-// Anti-spam: no maximo 30 requisicoes por minuto por IP.
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { ok: false, erro: "Muitas tentativas. Aguarde um instante." },
-  })
-);
+// Rate limit geral: 60 req/min por IP
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, erro: "Muitas tentativas. Aguarde um instante." },
+}));
 
-// Configuracao da grade (o site usa para desenhar os numeros).
+// Rate limit especifico para confirmacao: max 5 por 15 min por IP
+const limiteConfirmar = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, erro: "Limite de confirmacoes atingido. Tente novamente em 15 minutos." },
+});
+
 app.get("/api/config", (req, res) => {
   res.json({ ok: true, total: TOTAL, botUsername: username });
 });
 
-// Estado de todos os numeros: disponivel / confirmado / sorteado.
 app.get("/api/grade", (req, res) => {
   const mapa = {};
   for (const r of reservas) mapa[r.numero] = r.status;
@@ -193,30 +220,11 @@ app.get("/api/grade", (req, res) => {
   res.json({ ok: true, grade });
 });
 
-// Sorteia 5 numeros aleatorios ENTRE OS DISPONIVEIS.
-// (mecanica dinamica: o jogador nao escolhe na grade cheia, ele recebe 5 opcoes)
-app.get("/api/sortear-opcoes", (req, res) => {
-  const ocupados = numerosOcupados();
-  const livres = [];
-  for (let n = 1; n <= TOTAL; n++) if (!ocupados.has(n)) livres.push(n);
-
-  if (livres.length === 0) {
-    return res.json({ ok: false, erro: "Todos os numeros ja foram reservados." });
-  }
-  // Embaralha e pega ate 5.
-  for (let i = livres.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [livres[i], livres[j]] = [livres[j], livres[i]];
-  }
-  res.json({ ok: true, opcoes: livres.slice(0, 5).sort((a, b) => a - b) });
-});
-
-// Confirma a participacao. Regra: 1 numero por ID; numero unico.
-app.post("/api/confirmar", (req, res) => {
-  const numero = Number(req.body?.numero);
-  const playerId = String(req.body?.playerId ?? "").trim();
-  const nomeReal = String(req.body?.nomeReal ?? "").trim();
-  const telegramNome = String(req.body?.telegramNome ?? "").trim();
+app.post("/api/confirmar", limiteConfirmar, async (req, res) => {
+  const numero       = Number(req.body?.numero);
+  const playerId     = sanitizar(String(req.body?.playerId     ?? ""));
+  const nomeReal     = sanitizar(String(req.body?.nomeReal     ?? ""));
+  const telegramNome = sanitizar(String(req.body?.telegramNome ?? ""));
 
   if (!idValido(playerId)) {
     return res.status(400).json({ ok: false, erro: "Informe seu ID de jogador (1 a 40 caracteres)." });
@@ -230,26 +238,36 @@ app.post("/api/confirmar", (req, res) => {
   if (!telegramValido(telegramNome)) {
     return res.status(400).json({ ok: false, erro: "Informe seu nome de usuario no Telegram." });
   }
-  if (acharPorPlayer(playerId)) {
-    return res.status(409).json({ ok: false, erro: "Este ID ja registrou um numero. Cada ID participa apenas uma vez." });
+
+  const jaRegistrado = acharPorPlayer(playerId);
+  if (jaRegistrado) {
+    const numExistente = String(jaRegistrado.numero).padStart(2, "0");
+    return res.status(409).json({
+      ok: false,
+      erro: `Este ID ja esta registrado com o numero ${numExistente}. Cada ID participa apenas uma vez.`,
+    });
   }
+
   if (acharPorNumero(numero)) {
-    return res.status(409).json({ ok: false, erro: "Este numero acabou de ser reservado por outra pessoa. Escolha outro." });
+    return res.status(409).json({
+      ok: false,
+      erro: "Este numero acabou de ser reservado por outra pessoa. Escolha outro.",
+    });
   }
 
   const claimToken = crypto.randomBytes(16).toString("hex");
   const reserva = {
     numero,
-    player_id: playerId,
-    nome_real: nomeReal,
+    player_id:     playerId,
+    nome_real:     nomeReal,
     telegram_nome: telegramNome,
-    status: "confirmado",
-    claim_token: claimToken,
+    status:        "confirmado",
+    claim_token:   claimToken,
     telegram_chat: null,
-    criado_em: new Date().toISOString(),
+    criado_em:     new Date().toISOString(),
   };
   reservas.push(reserva);
-  salvarReservas(reservas);
+  await salvarReservas(reservas);
 
   avisarEquipe(reserva);
 
@@ -259,7 +277,6 @@ app.post("/api/confirmar", (req, res) => {
     playerId,
     nomeReal,
     telegramNome,
-    // O site usa isto para montar o botao "Receber confirmacao no Telegram".
     telegramLink: `https://t.me/${username}?start=${claimToken}`,
   });
 });
