@@ -293,6 +293,24 @@
   $("btnConfirmar").onclick=confirmar;
 
   carregarGrade();
+
+  // Auto-refresh da grade a cada 30 segundos
+  setInterval(async () => {
+    try{
+      const r = await fetch(API_BASE + "/api/grade");
+      const data = await r.json();
+      if(!data.ok) return;
+      const novosOcupados = {};
+      data.grade.forEach(g => { if(g.status!=="disponivel") novosOcupados[g.numero]=g.status; });
+      if(escolhido && novosOcupados[escolhido]){
+        escolhido = null;
+        $("selInfo").textContent = "";
+        showMsg("O número que você selecionou foi reservado por outra pessoa. Escolha outro.");
+      }
+      ocupados = novosOcupados;
+      desenha(data.grade.length);
+    }catch(e){ /* silencioso */ }
+  }, 30000);
 </script>
 </body>
 </html>
