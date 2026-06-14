@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Número da Sorte · Copa TGJOGO (Demo)</title>
+<style>
+  :root{--pitch:#0b3d2e;--pitch-2:#0f5138;--gold:#ffd84d;--gold-2:#f5a623;--livre:#2e9e5b;--conf:#c0392b;--ink:#0a2a20;--paper:#f7faf8;--muted:#9fc4b3;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:radial-gradient(1200px 600px at 50% -10%,var(--pitch-2),transparent 60%),var(--pitch);color:var(--paper);min-height:100vh;line-height:1.5;padding:24px 16px 64px}
+  .wrap{max-width:720px;margin:0 auto}
+  .demo-badge{background:rgba(255,216,77,.15);border:1px dashed rgba(255,216,77,.5);color:var(--gold);text-align:center;font-size:13px;padding:8px 12px;border-radius:10px;margin-bottom:16px}
+  header{text-align:center;padding:8px 0 20px}
+  .eyebrow{letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--gold);font-weight:700}
+  h1{font-size:clamp(28px,7vw,46px);line-height:1.05;margin:8px 0 10px;font-weight:800}
+  h1 .trophy{color:var(--gold)}
+  header p{color:#d7ece1;max-width:460px;margin:0 auto}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;margin-top:18px}
+  .card h2{font-size:18px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .step-num{background:var(--gold);color:var(--ink);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+  .hint{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .sel-info{color:var(--gold)}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+  input[type="text"]{width:100%;padding:13px 15px;font-size:16px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff}
+  input[type="text"]:focus{outline:2px solid var(--gold);border-color:transparent}
+  button{font-family:inherit;cursor:pointer;border:none;font-weight:800;font-size:16px;border-radius:12px;padding:15px 18px;width:100%;margin-top:14px}
+  button:active{transform:translateY(1px)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--ink)}
+  .btn-ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:6px}
+  .cell{aspect-ratio:1;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent}
+  .cell.livre{background:var(--livre);color:#eafff2}
+  .cell.reservado{background:var(--conf);color:#fff;cursor:not-allowed}
+  .cell.sel{background:var(--gold);color:var(--ink);border-color:#fff}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#d7ece1}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .msg{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:14px;display:none}
+  .msg.erro{background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);color:#ffd7d2;display:block}
+  .sucesso{text-align:center;display:none}
+  .sucesso.show{display:block}
+  .sucesso .big-num{font-size:60px;font-weight:900;color:var(--gold);margin:4px 0}
+  .resumo{font-size:14px;color:#d7ece1;line-height:1.8}
+  .resumo strong{color:#fff}
+  .hidden{display:none!important}
+  footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="demo-badge">⚠️ Versão DEMONSTRAÇÃO — funciona sozinha, salva no seu navegador. Não envia Telegram.</div>
+  <header>
+    <div class="eyebrow">Sorteio oficial</div>
+    <h1><span class="trophy">🏆</span> Número da Sorte<br/>Copa TGJOGO</h1>
+    <p>Escolha seu número da sorte e participe do sorteio especial da Copa!</p>
+  </header>
+
+  <section class="card" id="painel">
+    <h2><span class="step-num">1</span> Escolha seu número</h2>
+    <div class="hint">Toque em um número disponível (verde). <span class="sel-info" id="selInfo"></span></div>
+    <div class="grid" id="grid"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--livre)"></i> Disponível</span>
+      <span><i class="dot" style="background:var(--conf)"></i> Reservado</span>
+      <span><i class="dot" style="background:var(--gold)"></i> Selecionado</span>
+    </div>
+
+    <h2 style="margin-top:22px"><span class="step-num">2</span> Preencha seus dados</h2>
+    <label>ID de jogador TGJOGO</label>
+    <input type="text" id="playerId" placeholder="Ex: Joaozin5, 123456, @joao#" maxlength="40" autocomplete="off" />
+    <label>Seu nome real</label>
+    <input type="text" id="nomeReal" placeholder="Ex: João da Silva" maxlength="60" autocomplete="off" />
+    <label>Seu nome/usuário no Telegram</label>
+    <input type="text" id="tgNome" placeholder="Ex: @joaosilva" maxlength="40" autocomplete="off" />
+
+    <button class="btn-gold" id="btnConfirmar" disabled>✅ Confirmar participação</button>
+    <button class="btn-ghost" id="btnReset" style="margin-top:8px">🔄 Limpar tudo (recomeçar demo)</button>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <section class="card sucesso" id="sucesso">
+    <h2 style="justify-content:center">Participação registrada! 🍀</h2>
+    <div>Seu número da sorte é</div>
+    <div class="big-num" id="numFinal">--</div>
+    <div class="resumo" id="resumo"></div>
+    <button class="btn-gold" id="btnOutra" style="margin-top:18px">Registrar outra participação</button>
+  </section>
+
+  <footer>Número da Sorte · Copa TGJOGO — versão demonstração</footer>
+</div>
+
+<script>
+  var TOTAL = 100;
+  var STORE = "tgjogo_demo_reservas";
+  var escolhido = null;
+
+  function $(id){ return document.getElementById(id); }
+  function carregar(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+  function salvar(o){ try{ localStorage.setItem(STORE, JSON.stringify(o)); }catch(e){} }
+
+  var reservas = carregar();
+
+  function desenha(){
+    var grid = $("grid"); grid.innerHTML="";
+    for(var n=1;n<=TOTAL;n++){
+      var d=document.createElement("div");
+      var cls="cell ";
+      if(reservas[n]) cls+="reservado";
+      else if(escolhido===n) cls+="sel";
+      else cls+="livre";
+      d.className=cls;
+      d.textContent=String(n).padStart(2,"0");
+      d.setAttribute("data-n", n);
+      grid.appendChild(d);
+    }
+  }
+
+  $("grid").addEventListener("click", function(e){
+    var cell = e.target.closest("[data-n]"); if(!cell) return;
+    var n = parseInt(cell.getAttribute("data-n"),10);
+    if(reservas[n]) return;
+    escolhido = n;
+    $("selInfo").textContent = "Número "+String(n).padStart(2,"0")+" selecionado.";
+    desenha(); valida();
+  });
+
+  function valida(){
+    var id=$("playerId").value.trim();
+    var nome=$("nomeReal").value.trim();
+    var tg=$("tgNome").value.trim();
+    var ok = escolhido && id.length>=1 && id.length<=40 && nome.length>=3 && tg.length>=2;
+    $("btnConfirmar").disabled = !ok;
+  }
+  ["playerId","nomeReal","tgNome"].forEach(function(id){ $(id).addEventListener("input", valida); });
+
+  function showMsg(t){ var m=$("msg"); m.textContent=t; m.className="msg erro"; }
+
+  $("btnConfirmar").addEventListener("click", function(){
+    var id=$("playerId").value.trim();
+    var nome=$("nomeReal").value.trim();
+    var tg=$("tgNome").value.trim();
+    if(!escolhido){ showMsg("Escolha um número na grade."); return; }
+    if(id.length<1 || id.length>40){ showMsg("Informe seu ID de jogador."); return; }
+    if(nome.length<3){ showMsg("Informe seu nome real."); return; }
+    if(tg.length<2){ showMsg("Informe seu nome no Telegram."); return; }
+    reservas[escolhido] = { id:id, nome:nome, tg:tg, em:new Date().toLocaleString("pt-BR") };
+    salvar(reservas);
+    $("numFinal").textContent=String(escolhido).padStart(2,"0");
+    $("resumo").innerHTML="ID: <strong>"+id+"</strong><br/>Nome: <strong>"+nome+"</strong><br/>Telegram: <strong>"+tg+"</strong>";
+    $("painel").classList.add("hidden");
+    $("sucesso").classList.add("show");
+    escolhido=null;
+  });
+
+  $("btnOutra").addEventListener("click", function(){
+    $("sucesso").classList.remove("show");
+    $("painel").classList.remove("hidden");
+    $("playerId").value=""; $("nomeReal").value=""; $("tgNome").value="";
+    $("selInfo").textContent=""; $("msg").className="msg";
+    $("btnConfirmar").disabled=true;
+    desenha();
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  $("btnReset").addEventListener("click", function(){
+    if(confirm("Apagar todas as participações desta demo?")){
+      reservas={}; salvar(reservas); escolhido=null;
+      $("selInfo").textContent=""; desenha(); valida();
+    }
+  });
+
+  desenha();
+</script>
+</body>
+</html>
