@@ -47,7 +47,7 @@ return s
 }
 
 // --------------------------------------------------------------------
-// ARMAZENAMENTO â Upstash Redis (permanente) ou arquivo JSON (local)
+// ARMAZENAMENTO — Upstash Redis (permanente) ou arquivo JSON (local)
 // --------------------------------------------------------------------
 const DB_FILE = "campanha.json";
 const REDIS_KEY = "tgjogo:reservas";
@@ -103,9 +103,9 @@ fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 
 let reservas = await carregarReservas();
 if (usandoRedis) {
-console.log("[Storage] Usando Upstash Redis â dados persistentes.");
+console.log("[Storage] Usando Upstash Redis — dados persistentes.");
 } else {
-console.warn("[Storage] Upstash nao configurado â usando arquivo local.");
+console.warn("[Storage] Upstash nao configurado — usando arquivo local.");
 }
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
@@ -165,18 +165,18 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-`Participacao confirmada! ð\n\n` +
-`ð NUMERO DA SORTE COPA TGJOGO\n\n` +
-`ðï¸ Seu numero: ${numero}\n` +
-`ð ID do jogador: ${reserva.player_id}\n` +
-`ð¤ Nome: ${reserva.nome_real}\n` +
-`â Status: registrado\n\n` +
+`Participacao confirmada! 🍀\n\n` +
+`🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
+`🎟️ Seu numero: ${numero}\n` +
+`🆔 ID do jogador: ${reserva.player_id}\n` +
+`👤 Nome: ${reserva.nome_real}\n` +
+`✅ Status: registrado\n\n` +
 `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
 );
 });
 
 // --------------------------------------------------------------------
-// /meu_numero â jogador consulta seu numero pelo bot
+// /meu_numero — jogador consulta seu numero pelo bot
 // --------------------------------------------------------------------
 bot.onText(/\/meu_numero/, async (msg) => {
 const chatId = msg.chat.id;
@@ -189,17 +189,17 @@ if (reserva) {
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(
 chatId,
-"ð¯ Seu nÃºmero da sorte Ã© o *" + numero + "*!\n\n" +
-"ð¤ Nome: " + reserva.nome_real + "\n" +
-"ð ID: " + reserva.player_id + "\n\n" +
-"Boa sorte na Copa TGJOGO! â½",
+"🎯 Seu número da sorte é o *" + numero + "*!\n\n" +
+"👤 Nome: " + reserva.nome_real + "\n" +
+"🆔 ID: " + reserva.player_id + "\n\n" +
+"Boa sorte na Copa TGJOGO! ⚽",
 { parse_mode: "Markdown" }
 );
 } else {
 bot.sendMessage(
 chatId,
-"â VocÃª ainda nÃ£o tem um nÃºmero registrado.\n\n" +
-"Acesse o site e escolha o seu! ðï¸"
+"❌ Você ainda não tem um número registrado.\n\n" +
+"Acesse o site e escolha o seu! 🎟️"
 );
 }
 });
@@ -211,7 +211,7 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-`ðï¸ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
+`🎟️ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
 `Numero escolhido: ${numero}\n` +
 `ID do jogador: ${reserva.player_id}\n` +
 `Nome real: ${reserva.nome_real}\n` +
@@ -349,20 +349,20 @@ r.telegram_chat ? "Sim" : "Nao",
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
-res.send("ï»¿" + linhas); // BOM para Excel abrir corretamente
+res.send("﻿" + linhas);
 });
 
 // --------------------------------------------------------------------
-// LIBERAR NUMERO (admin) â remove participante e libera o slot
+// LIBERAR NUMERO (admin) — remove participante e libera o slot
 // --------------------------------------------------------------------
 app.post("/api/admin/liberar/:numero", checkAdmin, async (req, res) => {
 const num = parseInt(req.params.numero, 10);
-if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "NÃºmero invÃ¡lido." });
+if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "Numero invalido." });
 const idx = reservas.findIndex((r) => r.numero === num);
-if (idx === -1) return res.status(404).json({ ok: false, erro: "NÃºmero nÃ£o registrado." });
+if (idx === -1) return res.status(404).json({ ok: false, erro: "Numero nao registrado." });
 const removida = reservas.splice(idx, 1)[0];
 await salvarReservas(reservas);
-console.log(`[Admin] NÃºmero ${num} liberado (era de ${removida.player_id})`);
+console.log(`[Admin] Numero ${num} liberado (era de ${removida.player_id})`);
 res.json({ ok: true, numero: num, player_id: removida.player_id });
 });
 
@@ -372,7 +372,8 @@ res.send(`<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin Â· Copa TGJOGO</title>
+<title>Admin - Copa TGJOGO</title>
+<res>content="text/html;charset=utf-8">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",system-ui,sans-serif;background:#0b3d2e;color:#f0faf5;min-height:100vh;padding:24px 16px}
@@ -402,30 +403,30 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>ð Painel Admin Â· Copa TGJOGO</h1>
+<h1>🏆 Painel Admin - Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
-<div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sTotal">-</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">-</div><div class="l">Disponiveis</div></div>
+<div class="stat"><div class="n" id="sBot">-</div><div class="l">Confirmados no Bot</div></div>
 </div>
 
-<a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
+<a class="btn" href="/api/admin/exportar">Exportar CSV</a>
 
-<div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">Atualiza automaticamente a cada 30 segundos</div>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()"/>
 
 <table>
 <thead>
 <tr>
-<th>NÂº</th>
+<th>Numero</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>AÃ§Ãµes</th>
+<th>Acoes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -436,16 +437,17 @@ let todos = [];
 
 async function carregar() {
 try {
-const r = await fetch('/api/admin/participantes');
+const r = await fetch('/api/admin/participantes', { credentials: 'include' });
 const d = await r.json();
 todos = d.participantes || [];
 document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
+document.getElementById('atualizado').textContent = 'Atualizado: ' + new Date().toLocaleTimeString();
 filtrar();
 } catch(e) {
 document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
+console.error(e);
 }
 }
 
@@ -468,19 +470,19 @@ tbody.innerHTML = lista.map(p => \`<tr>
 <td>\${p.telegram_nome}</td>
 <td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
 <td>\${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">ðï¸ Liberar</button></td>
+<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">Liberar</button></td>
 </tr>\`).join('');
 }
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o nÃºmero ' + n + '?\\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o numero ' + n + '? Esta acao remove o participante e libera o slot.')) return;
 try {
-const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
+const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST', credentials: 'include' });
 const d = await r.json();
-if (d.ok) { alert('â NÃºmero ' + n + ' liberado!'); carregar(); }
+if (d.ok) { alert('Numero ' + n + ' liberado com sucesso!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
+} catch(e) { alert('Erro de conexao.'); }
 }
 
 carregar();
@@ -494,5 +496,5 @@ app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
 if (ADMIN_PASSWORD) console.log("[Admin] Painel disponivel em /admin");
-else console.warn("[Admin] ADMIN_PASSWORD nao definido â painel desabilitado.");
+else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 });
