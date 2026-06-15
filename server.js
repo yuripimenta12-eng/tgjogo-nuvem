@@ -125,30 +125,24 @@ function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.leng
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM
+// BOT DO TELEGRAM (modo webhook — sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
+const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
+const WEBHOOK_URL  = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
+
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
 try {
-const resp = await fetch(
-`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`
-);
-const result = await resp.json();
-console.log("[Bot] Webhook removido:", result.ok);
+  await bot.setWebHook(WEBHOOK_URL, { drop_pending_updates: true });
+  console.log("[Bot] Webhook configurado:", WEBHOOK_URL.replace(TELEGRAM_BOT_TOKEN, "***"));
 } catch (e) {
-console.warn("[Bot] Nao foi possivel remover webhook:", e.message);
+  console.warn("[Bot] Erro ao configurar webhook:", e.message);
 }
-
-await new Promise((r) => setTimeout(r, 2000));
-bot.startPolling();
-bot.on("polling_error", (err) => {
-console.error("[Bot] Polling error:", err.code, err.message);
-});
 
 const username = (await bot.getMe()).username;
 console.log(`Bot conectado: @${username}`);
 
-bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
+bot.onText(/\/start(?:\s+(.*))?/, (msg, match) => {
 const chatId = msg.chat.id;
 const token = match && match[1] ? match[1].trim() : null;
 
@@ -272,6 +266,14 @@ next();
 }
 
 // --------------------------------------------------------------------
+// ROTA WEBHOOK DO TELEGRAM (deve ficar antes do rate-limit geral)
+// --------------------------------------------------------------------
+app.post(WEBHOOK_PATH, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+// --------------------------------------------------------------------
 // ROTAS PUBLICAS
 // --------------------------------------------------------------------
 app.get("/api/config", (req, res) => {
@@ -352,11 +354,11 @@ r.telegram_chat ? "Sim" : "Nao",
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
-res.send("﻿" + linhas); // BOM para Excel abrir corretamente
+res.send("﻿" + linhas);
 });
 
 // --------------------------------------------------------------------
-// LIBERAR NUMERO (admin) — remove participante e libera o slot
+// LIBERAR NUMERO (admin) -- remove participante e libera o slot
 // --------------------------------------------------------------------
 app.post("/api/admin/liberar/:numero", checkAdmin, async (req, res) => {
 const num = parseInt(req.params.numero, 10);
@@ -384,7 +386,7 @@ h1{color:#ffd84d;font-size:22px;margin-bottom:4px}
 .sub{color:#9fc4b3;font-size:13px;margin-bottom:20px}
 .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
 .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:130px}
-.stat .n{font-size:32px;font-weight:900;color:#ffd84d}
+.stat .{font-size:32px;font-weight:900;color:#ffd84d}
 .stat .l{font-size:12px;color:#9fc4b3;margin-top:2px}
 .btn{background:linear-gradient(180deg,#ffd84d,#f5a623);color:#0a2a20;font-weight:800;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block;margin-bottom:18px}
 .btn:hover{filter:brightness(1.1)}
