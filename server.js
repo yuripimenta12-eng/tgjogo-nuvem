@@ -119,12 +119,10 @@ function idValido(s)       { return typeof s === "string" && s.length >= 1 && s.
 function numeroValido(n)   { return Number.isInteger(n) && n >= 1 && n <= TOTAL; }
 function nomeValido(s)     { return typeof s === "string" && s.length >= 3 && s.length <= 60; }
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
-function numerosOcupados() { return new Set(reservas.map((r) => r.numero)); }
 
 // --------------------------------------------------------------------
 // BOT DO TELEGRAM
-// Remove webhook via REST (compativel com qualquer versao da lib),
-// aguarda 1s para o processo anterior liberar o polling, depois inicia.
+// Remove webhook via REST, aguarda 2s, depois inicia polling limpo.
 // --------------------------------------------------------------------
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
@@ -138,12 +136,9 @@ try {
   console.warn("[Bot] Nao foi possivel remover webhook:", e.message);
 }
 
-// Aguarda 2s para o processo anterior liberar a conexao de polling
 await new Promise((r) => setTimeout(r, 2000));
-
 bot.startPolling();
 
-// Trata erros de polling sem derrubar o servidor
 bot.on("polling_error", (err) => {
   console.error("[Bot] Polling error:", err.code, err.message);
 });
@@ -207,6 +202,10 @@ function avisarEquipe(reserva) {
 // API
 // --------------------------------------------------------------------
 const app = express();
+
+// Necessario para o rate limit funcionar corretamente atras do proxy do Render
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.static(path.join(__dirname, "site")));
