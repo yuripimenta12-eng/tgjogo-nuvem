@@ -122,7 +122,7 @@ const acharPorToken = (t) => reservas.find((r) => r.claim_token === t);
 function idValido(s) { return typeof s === "string" && s.length >= 1 && s.length <= 40; }
 function numeroValido(n) { return Number.isInteger(n) && n >= 1 && n <= TOTAL; }
 function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.length <= 60; }
-function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length 7= 40; }
+function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
 // BOT DO TELEGRAM
