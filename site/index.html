@@ -23,7 +23,10 @@
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;margin-top:18px}
   .card h2{font-size:18px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
   .step-num{background:var(--gold);color:var(--ink);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
-  .hint{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .hint{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .vagas-bar{text-align:center;font-size:14px;color:#d7ece1;margin:0 0 12px;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:10px}
+  .vagas-num{font-size:24px;font-weight:900;color:var(--gold);line-height:1}
+  .vagas-urgente .vagas-num{color:#ff7043}
   .sel-info{color:var(--gold)}
   label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
   input[type="text"]{width:100%;padding:13px 15px;font-size:16px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff}
@@ -152,6 +155,7 @@
   <section class="card" id="painel">
     <h2><span class="step-num">1</span> Escolha seu número</h2>
     <div class="hint">Toque em um número disponível (verde). <span class="sel-info" id="selInfo"></span></div>
+    <div class="vagas-bar" id="vagasBar">Carregando...</div>
     <div class="grid" id="grid"></div>
     <div class="legend">
       <span><i class="dot" style="background:var(--livre)"></i> Disponível</span>
@@ -221,6 +225,9 @@
       if(!data.ok) return;
       ocupados = {};
       data.grade.forEach(g => { if(g.status!=="disponivel") ocupados[g.numero]=g.status; });
+      const livres = data.grade.filter(g => g.status === "disponivel").length;
+      const vagasBar = $("vagasBar");
+      if(vagasBar){ vagasBar.innerHTML = '<span class="vagas-num">'+livres+'</span> de '+data.grade.length+' números disponíveis'; vagasBar.classList.toggle("vagas-urgente", livres <= 20); }
       desenha(data.grade.length);
     }catch(e){
       $("grid").innerHTML = "<div style='grid-column:1/-1;color:var(--muted);text-align:center;padding:10px'>Não foi possível carregar a grade. Verifique o servidor.</div>";
@@ -283,6 +290,7 @@
       $("resumo").innerHTML="ID: <strong>"+data.playerId+"</strong><br/>Nome: <strong>"+data.nomeReal+"</strong><br/>Telegram: <strong>"+data.telegramNome+"</strong>";
       $("btnTelegram").href=data.telegramLink;
       $("sucesso").classList.add("show");
+      if(typeof confetti==="function"){ confetti({particleCount:150,spread:80,origin:{y:0.5}}); setTimeout(()=>confetti({particleCount:80,angle:60,spread:55,origin:{x:0,y:0.6}}),400); setTimeout(()=>confetti({particleCount:80,angle:120,spread:55,origin:{x:1,y:0.6}}),700); }
     }catch(e){
       showMsg("Erro de conexão. Tente novamente.");
       $("btnConfirmar").disabled=false; $("btnConfirmar").textContent="✅ Confirmar participação";
@@ -310,5 +318,6 @@
     }catch(e){ /* silencioso */ }
   }, 30000);
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
 </body>
 </html>
