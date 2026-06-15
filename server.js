@@ -60,7 +60,6 @@ headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
 const json = await r.json();
 if (!json.result) return null;
 const first = JSON.parse(json.result);
-// Handle double-encoding: if still a string after first parse, parse again
 return typeof first === "string" ? JSON.parse(first) : first;
 }
 
@@ -142,7 +141,7 @@ try {
 const username = (await bot.getMe()).username;
 console.log(`Bot conectado: @${username}`);
 
-bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
+bot.onText(/\/start(?:\s+(.*))?/, (msg, match) => {
 const chatId = msg.chat.id;
 const token = match && match[1] ? match[1].trim() : null;
 
@@ -369,23 +368,26 @@ r.telegram_chat ? "Sim" : "Nao",
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
-res.send("﻿" + linhas); // BOM para Excel abrir corretamente
+res.send("\xEF\xBB\xBF" + linhas);
 });
 
 // --------------------------------------------------------------------
-// LIBERAR NUMERO (admin) — remove participante e libera o slot
+// LIBERAR NUMERO (admin) -- remove participante e libera o slot
 // --------------------------------------------------------------------
 app.post("/api/admin/liberar/:numero", checkAdmin, async (req, res) => {
 const num = parseInt(req.params.numero, 10);
-if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "Número inválido." });
+if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "Numero invalido." });
 const idx = reservas.findIndex((r) => r.numero === num);
-if (idx === -1) return res.status(404).json({ ok: false, erro: "Número não registrado." });
+if (idx === -1) return res.status(404).json({ ok: false, erro: "Numero nao registrado." });
 const removida = reservas.splice(idx, 1)[0];
 await salvarReservas(reservas);
-console.log(`[Admin] Número ${num} liberado (era de ${removida.player_id})`);
+console.log(`[Admin] Numero ${num} liberado (era de ${removida.player_id})`);
 res.json({ ok: true, numero: num, player_id: removida.player_id });
 });
 
+// --------------------------------------------------------------------
+// RESETAR GRADE (admin) -- apaga todos os participantes
+// --------------------------------------------------------------------
 app.post("/api/admin/reset", checkAdmin, async (req, res) => {
 const confirmacao = req.body?.confirmacao;
 if (confirmacao !== "RESETAR") {
@@ -476,4 +478,68 @@ todos = d.participantes || [];
 document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Úl
+document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+filtrar();
+} catch(e) {
+document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
+}
+}
+
+function filtrar() {
+const q = document.getElementById('busca').value.toLowerCase();
+const lista = q ? todos.filter(p =>
+p.nome_real.toLowerCase().includes(q) ||
+p.player_id.toLowerCase().includes(q) ||
+p.telegram_nome.toLowerCase().includes(q)
+) : todos;
+const tbody = document.getElementById('tbody');
+if (!lista.length) {
+tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontrado.</td></tr>';
+return;
+}
+tbody.innerHTML = lista.map(p => \`<tr>
+<td class="num">\${p.numero}</td>
+<td>\${p.player_id}</td>
+<td>\${p.nome_real}</td>
+<td>\${p.telegram_nome}</td>
+<td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
+<td>\${p.criado_em}</td>
+<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">🗑️ Liberar</button></td>
+</tr>\`).join('');
+}
+
+async function liberar(numero) {
+const n = String(numero).padStart(2, '0');
+if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
+try {
+const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
+const d = await r.json();
+if (d.ok) { alert('✅ Número ' + n + ' liberado!'); carregar(); }
+else alert('Erro: ' + d.erro);
+} catch(e) { alert('Erro de conexão.'); }
+}
+
+async function resetarGrade() {
+if (!confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\\n\\nTem certeza?')) return;
+if (!confirm('Segunda confirmação: realmente resetar toda a grade?')) return;
+try {
+const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
+const d = await r.json();
+if (d.ok) { alert('✅ Grade resetada! Todos os números estão disponíveis.'); carregar(); }
+else alert('Erro: ' + d.erro);
+} catch(e) { alert('Erro de conexão.'); }
+}
+
+carregar();
+setInterval(carregar, 30000);
+</script>
+</body>
+</html>`);
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+console.log(`Servidor no ar na porta ${PORT}.`);
+console.log(`Grade configurada de 1 a ${TOTAL}.`);
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
+else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
+});
