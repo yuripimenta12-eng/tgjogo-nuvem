@@ -122,18 +122,25 @@ function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.
 function numerosOcupados() { return new Set(reservas.map((r) => r.numero)); }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM — inicializa sem polling para evitar conflito 409
+// BOT DO TELEGRAM
+// Remove webhook via REST (compativel com qualquer versao da lib),
+// aguarda 1s para o processo anterior liberar o polling, depois inicia.
 // --------------------------------------------------------------------
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
-// Apaga qualquer webhook ativo e limpa atualizacoes pendentes,
-// depois inicia o polling limpo. Isso evita o erro 409 no redeploy.
 try {
-  await bot.deleteWebhook({ drop_pending_updates: true });
-  console.log("[Bot] Webhook removido, iniciando polling...");
+  const resp = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`
+  );
+  const result = await resp.json();
+  console.log("[Bot] Webhook removido:", result.ok);
 } catch (e) {
   console.warn("[Bot] Nao foi possivel remover webhook:", e.message);
 }
+
+// Aguarda 2s para o processo anterior liberar a conexao de polling
+await new Promise((r) => setTimeout(r, 2000));
+
 bot.startPolling();
 
 // Trata erros de polling sem derrubar o servidor
