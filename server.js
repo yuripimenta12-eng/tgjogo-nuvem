@@ -58,7 +58,10 @@ const r = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${key}`, {
 headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
 });
 const json = await r.json();
-return json.result ? JSON.parse(json.result) : null;
+if (!json.result) return null;
+const first = JSON.parse(json.result);
+// Handle double-encoding: if still a string after first parse, parse again
+return typeof first === "string" ? JSON.parse(first) : first;
 }
 
 async function redisSet(key, value) {
@@ -119,7 +122,7 @@ const acharPorToken = (t) => reservas.find((r) => r.claim_token === t);
 function idValido(s) { return typeof s === "string" && s.length >= 1 && s.length <= 40; }
 function numeroValido(n) { return Number.isInteger(n) && n >= 1 && n <= TOTAL; }
 function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.length <= 60; }
-function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
+function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length 7= 40; }
 
 // --------------------------------------------------------------------
 // BOT DO TELEGRAM
@@ -349,7 +352,7 @@ r.telegram_chat ? "Sim" : "Nao",
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
-res.send("﻿" + linhas);
+res.send("﻿" + linhas); // BOM para Excel abrir corretamente
 });
 
 // --------------------------------------------------------------------
@@ -357,12 +360,12 @@ res.send("﻿" + linhas);
 // --------------------------------------------------------------------
 app.post("/api/admin/liberar/:numero", checkAdmin, async (req, res) => {
 const num = parseInt(req.params.numero, 10);
-if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "Numero invalido." });
+if (!numeroValido(num)) return res.status(400).json({ ok: false, erro: "Número inválido." });
 const idx = reservas.findIndex((r) => r.numero === num);
-if (idx === -1) return res.status(404).json({ ok: false, erro: "Numero nao registrado." });
+if (idx === -1) return res.status(404).json({ ok: false, erro: "Número não registrado." });
 const removida = reservas.splice(idx, 1)[0];
 await salvarReservas(reservas);
-console.log(`[Admin] Numero ${num} liberado (era de ${removida.player_id})`);
+console.log(`[Admin] Número ${num} liberado (era de ${removida.player_id})`);
 res.json({ ok: true, numero: num, player_id: removida.player_id });
 });
 
@@ -372,8 +375,7 @@ res.send(`<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin - Copa TGJOGO</title>
-<res>content="text/html;charset=utf-8">
+<title>Admin · Copa TGJOGO</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",system-ui,sans-serif;background:#0b3d2e;color:#f0faf5;min-height:100vh;padding:24px 16px}
@@ -403,30 +405,30 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>🏆 Painel Admin - Copa TGJOGO</h1>
+<h1>🏆 Painel Admin · Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">-</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">-</div><div class="l">Disponiveis</div></div>
-<div class="stat"><div class="n" id="sBot">-</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sTotal">—</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">—</div><div class="l">Disponíveis</div></div>
+<div class="stat"><div class="n" id="sBot">—</div><div class="l">Confirmados no Bot</div></div>
 </div>
 
-<a class="btn" href="/api/admin/exportar">Exportar CSV</a>
+<a class="btn" href="/api/admin/exportar">⬇️ Exportar CSV</a>
 
-<div class="refresh">Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">🔄 Atualiza automaticamente a cada 30 segundos</div>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()"/>
 
 <table>
 <thead>
 <tr>
-<th>Numero</th>
+<th>Nº</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>Acoes</th>
+<th>Ações</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -443,11 +445,10 @@ todos = d.participantes || [];
 document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Atualizado: ' + new Date().toLocaleTimeString();
+document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
 filtrar();
 } catch(e) {
 document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
-console.error(e);
 }
 }
 
@@ -470,19 +471,19 @@ tbody.innerHTML = lista.map(p => \`<tr>
 <td>\${p.telegram_nome}</td>
 <td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
 <td>\${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">Liberar</button></td>
+<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">🗑️ Liberar</button></td>
 </tr>\`).join('');
 }
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o numero ' + n + '? Esta acao remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
 try {
-const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST', credentials: 'include' });
+const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
-if (d.ok) { alert('Numero ' + n + ' liberado com sucesso!'); carregar(); }
+if (d.ok) { alert('✅ Número ' + n + ' liberado!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexao.'); }
+} catch(e) { alert('Erro de conexão.'); }
 }
 
 carregar();
@@ -495,6 +496,6 @@ setInterval(carregar, 30000);
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponivel em /admin");
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 });
