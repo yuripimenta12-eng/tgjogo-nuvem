@@ -142,7 +142,7 @@ try {
 const username = (await bot.getMe()).username;
 console.log(`Bot conectado: @${username}`);
 
-bot.onText(/\/start(?:\s+(.*))?/, (msg, match) => {
+bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
 const chatId = msg.chat.id;
 const token = match && match[1] ? match[1].trim() : null;
 
@@ -200,6 +200,15 @@ chatId,
 );
 }
 });
+
+function avisarGradeCheia() {
+if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
+bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
+`🎉 GRADE COMPLETA! - COPA TGJOGO\n\n` +
+`Todos os ${TOTAL} números foram preenchidos!\n\n` +
+`O sorteio pode ser realizado agora. 🏆`
+).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
+}
 
 function avisarEquipe(reserva) {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
@@ -306,6 +315,11 @@ if (jaRegistrado) {
 const numExistente = String(jaRegistrado.numero).padStart(2, "0");
 return res.status(409).json({ ok: false, erro: `Este ID ja esta registrado com o numero ${numExistente}. Cada ID participa apenas uma vez.` });
 }
+const jaUsouTelegram = reservas.find((r) => r.telegram_nome.toLowerCase() === telegramNome.toLowerCase());
+if (jaUsouTelegram) {
+const numExistente = String(jaUsouTelegram.numero).padStart(2, "0");
+return res.status(409).json({ ok: false, erro: `Este Telegram ja esta registrado com o numero ${numExistente}. Cada conta Telegram participa apenas uma vez.` });
+}
 if (acharPorNumero(numero)) {
 return res.status(409).json({ ok: false, erro: "Este numero acabou de ser reservado por outra pessoa. Escolha outro." });
 }
@@ -319,6 +333,7 @@ criado_em: new Date().toISOString(),
 reservas.push(reserva);
 await salvarReservas(reservas);
 avisarEquipe(reserva);
+if (reservas.length === TOTAL) avisarGradeCheia();
 
 res.json({ ok: true, numero, playerId, nomeReal, telegramNome,
 telegramLink: `https://t.me/${username}?start=${claimToken}` });
@@ -354,11 +369,11 @@ r.telegram_chat ? "Sim" : "Nao",
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
-res.send("﻿" + linhas);
+res.send("﻿" + linhas); // BOM para Excel abrir corretamente
 });
 
 // --------------------------------------------------------------------
-// LIBERAR NUMERO (admin) -- remove participante e libera o slot
+// LIBERAR NUMERO (admin) — remove participante e libera o slot
 // --------------------------------------------------------------------
 app.post("/api/admin/liberar/:numero", checkAdmin, async (req, res) => {
 const num = parseInt(req.params.numero, 10);
@@ -369,6 +384,17 @@ const removida = reservas.splice(idx, 1)[0];
 await salvarReservas(reservas);
 console.log(`[Admin] Número ${num} liberado (era de ${removida.player_id})`);
 res.json({ ok: true, numero: num, player_id: removida.player_id });
+});
+
+app.post("/api/admin/reset", checkAdmin, async (req, res) => {
+const confirmacao = req.body?.confirmacao;
+if (confirmacao !== "RESETAR") {
+return res.status(400).json({ ok: false, erro: 'Envie { "confirmacao": "RESETAR" } para confirmar.' });
+}
+reservas = [];
+await salvarReservas(reservas);
+console.log("[Admin] Grade resetada!");
+res.json({ ok: true, mensagem: "Grade resetada com sucesso. Todos os numeros estao disponiveis." });
 });
 
 app.get("/admin", checkAdmin, (req, res) => {
@@ -386,12 +412,14 @@ h1{color:#ffd84d;font-size:22px;margin-bottom:4px}
 .sub{color:#9fc4b3;font-size:13px;margin-bottom:20px}
 .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
 .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:130px}
-.stat .{font-size:32px;font-weight:900;color:#ffd84d}
+.stat .n{font-size:32px;font-weight:900;color:#ffd84d}
 .stat .l{font-size:12px;color:#9fc4b3;margin-top:2px}
 .btn{background:linear-gradient(180deg,#ffd84d,#f5a623);color:#0a2a20;font-weight:800;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block;margin-bottom:18px}
 .btn:hover{filter:brightness(1.1)}
 .btn-lib{background:rgba(255,80,60,.12);border:1px solid rgba(255,80,60,.35);color:#ff7070;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600}
 .btn-lib:hover{background:rgba(255,80,60,.28)}
+.btn-reset{background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.4);color:#ff5555;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;font-weight:800;margin-left:10px}
+.btn-reset:hover{background:rgba(255,50,50,.3)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:rgba(255,255,255,.1);padding:10px 12px;text-align:left;color:#ffd84d;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
@@ -417,6 +445,7 @@ input[type=text]::placeholder{color:#9fc4b3}
 </div>
 
 <a class="btn" href="/api/admin/exportar">⬇️ Exportar CSV</a>
+<button class="btn-reset" onclick="resetarGrade()">🗑️ Resetar Grade</button>
 
 <div class="refresh">🔄 Atualiza automaticamente a cada 30 segundos</div>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()"/>
@@ -447,57 +476,4 @@ todos = d.participantes || [];
 document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
-filtrar();
-} catch(e) {
-document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
-}
-}
-
-function filtrar() {
-const q = document.getElementById('busca').value.toLowerCase();
-const lista = q ? todos.filter(p =>
-p.nome_real.toLowerCase().includes(q) ||
-p.player_id.toLowerCase().includes(q) ||
-p.telegram_nome.toLowerCase().includes(q)
-) : todos;
-const tbody = document.getElementById('tbody');
-if (!lista.length) {
-tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontrado.</td></tr>';
-return;
-}
-tbody.innerHTML = lista.map(p => \`<tr>
-<td class="num">\${p.numero}</td>
-<td>\${p.player_id}</td>
-<td>\${p.nome_real}</td>
-<td>\${p.telegram_nome}</td>
-<td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
-<td>\${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">🗑️ Liberar</button></td>
-</tr>\`).join('');
-}
-
-async function liberar(numero) {
-const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
-try {
-const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
-const d = await r.json();
-if (d.ok) { alert('✅ Número ' + n + ' liberado!'); carregar(); }
-else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexão.'); }
-}
-
-carregar();
-setInterval(carregar, 30000);
-</script>
-</body>
-</html>`);
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-console.log(`Servidor no ar na porta ${PORT}.`);
-console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
-else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
-});
+document.getElementById('atualizado').textContent = 'Úl
