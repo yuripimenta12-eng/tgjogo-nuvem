@@ -5,332 +5,365 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://numerodasortetg.onrender.com/" />
-<meta property="og:title" content="Número da Sorte · Copa TGJOGO — Garanta o seu agora!" />
-<meta property="og:description" content="Escolha seu número da sorte e participe do sorteio especial da Copa TGJOGO! 100 números disponíveis — garanta o seu agora." />
+<meta property="og:title" content="NÃºmero da Sorte Â· Copa TGJOGO â Garanta o seu agora!" />
+<meta property="og:description" content="Escolha seu nÃºmero da sorte e participe do sorteio especial da Copa TGJOGO! 100 nÃºmeros disponÃ­veis â garanta o seu agora." />
 <meta property="og:image" content="https://numerodasortetg.onrender.com/COPA-TGJOGO.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:locale" content="pt_BR" />
-    <meta property="og:site_name" content="Copa TGJOGO" />
+<meta property="og:site_name" content="Copa TGJOGO" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Número da Sorte · Copa TGJOGO — Garanta o seu agora!" />
-<meta name="twitter:description" content="Escolha seu número da sorte e participe do sorteio especial da Copa TGJOGO!" />
+<meta name="twitter:title" content="NÃºmero da Sorte Â· Copa TGJOGO â Garanta o seu agora!" />
+<meta name="twitter:description" content="Escolha seu nÃºmero da sorte e participe do sorteio especial da Copa TGJOGO!" />
 <meta name="twitter:image" content="https://numerodasortetg.onrender.com/COPA-TGJOGO.png" />
-<meta name="description" content="Escolha seu número da sorte e participe do sorteio especial da Copa TGJOGO! 100 números disponíveis — garanta o seu agora." />
-<title>Número da Sorte · Copa TGJOGO</title>
+<meta name="description" content="Escolha seu nÃºmero da sorte e participe do sorteio especial da Copa TGJOGO! 100 nÃºmeros disponÃ­veis â garanta o seu agora." />
+<title>NÃºmero da Sorte Â· Copa TGJOGO</title>
 <style>
-  :root{
-    --pitch:#0b3d2e; --pitch-2:#0f5138; --gold:#ffd84d; --gold-2:#f5a623;
-    --livre:#2e9e5b; --conf:#c0392b; --ink:#0a2a20; --paper:#f7faf8; --muted:#9fc4b3;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
-    background:radial-gradient(1200px 600px at 50% -10%,var(--pitch-2),transparent 60%),var(--pitch);
-    color:var(--paper);min-height:100vh;line-height:1.5;padding:24px 16px 64px;
-  }
-  .wrap{max-width:720px;margin:0 auto}
-  header{text-align:center;padding:8px 0 24px}
-  .logo-img{width:min(280px,70vw);height:auto;display:block;margin:0 auto 12px;filter:drop-shadow(0 4px 24px rgba(0,0,0,.5))}
-  .eyebrow{letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--gold);font-weight:700}
-  header p{color:#d7ece1;max-width:460px;margin:0 auto;margin-top:8px}
-  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;margin-top:18px}
-  .card h2{font-size:18px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-  .step-num{background:var(--gold);color:var(--ink);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
-  .hint{font-size:13px;color:var(--muted);margin-bottom:8px}
-  .vagas-bar{text-align:center;font-size:14px;color:#d7ece1;margin:0 0 12px;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:10px}
-  .vagas-num{font-size:24px;font-weight:900;color:var(--gold);line-height:1}
-  .vagas-urgente .vagas-num{color:#ff7043}
-  .sel-info{color:var(--gold)}
-  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
-  input[type="text"]{width:100%;padding:13px 15px;font-size:16px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff}
-  input[type="text"]:focus{outline:2px solid var(--gold);border-color:transparent}
-  button{font-family:inherit;cursor:pointer;border:none;font-weight:800;font-size:16px;border-radius:12px;padding:15px 18px;width:100%;margin-top:14px;transition:transform .08s,filter .15s}
-  button:active{transform:translateY(1px)}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  .btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--ink)}
-  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:6px}
-  @media(max-width:480px){.grid{grid-template-columns:repeat(10,1fr);gap:3px}}
-  .cell{aspect-ratio:1;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent}
-  .cell.livre{background:var(--livre);color:#eafff2}
-  .cell.reservado{background:var(--conf);color:#fff;cursor:not-allowed}
-  .cell.sel{background:var(--gold);color:var(--ink);border-color:#fff}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#d7ece1}
-  .legend span{display:inline-flex;align-items:center;gap:6px}
-  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
-  .msg{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:14px;display:none}
-  .msg.erro{background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);color:#ffd7d2;display:block}
-  .sucesso{text-align:center;display:none}
-  .sucesso.show{display:block}
-  .sucesso .big-num{font-size:60px;font-weight:900;color:var(--gold);margin:4px 0}
-  .resumo{font-size:14px;color:#d7ece1;line-height:1.8}
-  .resumo strong{color:#fff}
-  .hidden{display:none!important}
-  footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted)}
+:root{
+--pitch:#0b3d2e; --pitch-2:#0f5138; --gold:#ffd84d; --gold-2:#f5a623;
+--livre:#2e9e5b; --conf:#c0392b; --ink:#0a2a20; --paper:#f7faf8; --muted:#9fc4b3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+background:radial-gradient(1200px 600px at 50% -10%,var(--pitch-2),transparent 60%),var(--pitch);
+color:var(--paper);min-height:100vh;line-height:1.5;padding:24px 16px 64px;
+}
+.wrap{max-width:720px;margin:0 auto}
+header{text-align:center;padding:8px 0 24px}
+.logo-img{width:min(280px,70vw);height:auto;display:block;margin:0 auto 12px;filter:drop-shadow(0 4px 24px rgba(0,0,0,.5))}
+.eyebrow{letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--gold);font-weight:700}
+header p{color:#d7ece1;max-width:460px;margin:0 auto;margin-top:8px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;margin-top:18px}
+.card h2{font-size:18px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.step-num{background:var(--gold);color:var(--ink);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.hint{font-size:13px;color:var(--muted);margin-bottom:8px}
+.vagas-bar{text-align:center;font-size:14px;color:#d7ece1;margin:0 0 12px;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:10px}
+.vagas-num{font-size:24px;font-weight:900;color:var(--gold);line-height:1}
+.vagas-urgente .vagas-num{color:#ff7043}
+.sel-info{color:var(--gold)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input[type="text"]{width:100%;padding:13px 15px;font-size:16px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff}
+input[type="text"]:focus{outline:2px solid var(--gold);border-color:transparent}
+button{font-family:inherit;cursor:pointer;border:none;font-weight:800;font-size:16px;border-radius:12px;padding:15px 18px;width:100%;margin-top:14px;transition:transform .08s,filter .15s}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:6px}
+@media(max-width:480px){.grid{grid-template-columns:repeat(10,1fr);gap:3px}}
+.cell{aspect-ratio:1;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:700;cursor:pointer;border:2px solid transparent}
+.cell.livre{background:var(--livre);color:#eafff2}
+.cell.reservado{background:var(--conf);color:#fff;cursor:not-allowed}
+.cell.sel{background:var(--gold);color:var(--ink);border-color:#fff}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#d7ece1}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+.msg{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:14px;display:none}
+.msg.erro{background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);color:#ffd7d2;display:block}
+.sucesso{text-align:center;display:none}
+.sucesso.show{display:block}
+.sucesso .big-num{font-size:60px;font-weight:900;color:var(--gold);margin:4px 0}
+.resumo{font-size:14px;color:#d7ece1;line-height:1.8}
+.resumo strong{color:#fff}
+.hidden{display:none!important}
+footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted)}
 
-  /* Regulamento accordion */
-  .rules-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;margin-top:18px;overflow:hidden}
-  .rules-toggle{width:100%;background:none;border:none;color:var(--paper);font-family:inherit;font-size:15px;font-weight:700;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:0}
-  .rules-toggle:hover{background:rgba(255,255,255,.05)}
-  .rules-toggle .arrow{transition:transform .25s;font-size:13px;color:var(--gold)}
-  .rules-toggle.open .arrow{transform:rotate(180deg)}
-  .rules-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
-  .rules-body.open{max-height:5000px}
-  .rules-content{padding:4px 22px 22px;font-size:13px;color:#d7ece1;line-height:1.75}
-  .rules-content h3{font-size:12px;font-weight:800;color:var(--gold);margin:16px 0 5px;text-transform:uppercase;letter-spacing:.07em}
-  .rules-content p{margin-bottom:8px}
-  .rules-content ol,.rules-content ul{padding-left:18px;margin-bottom:8px}
-  .rules-content li{margin-bottom:3px}
+/* Regulamento accordion */
+.rules-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:18px;margin-top:18px;overflow:hidden}
+.rules-toggle{width:100%;background:none;border:none;color:var(--paper);font-family:inherit;font-size:15px;font-weight:700;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:0}
+.rules-toggle:hover{background:rgba(255,255,255,.05)}
+.rules-toggle .arrow{transition:transform .25s;font-size:13px;color:var(--gold)}
+.rules-toggle.open .arrow{transform:rotate(180deg)}
+.rules-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.rules-body.open{max-height:5000px}
+.rules-content{padding:4px 22px 22px;font-size:13px;color:#d7ece1;line-height:1.75}
+.rules-content h3{font-size:12px;font-weight:800;color:var(--gold);margin:16px 0 5px;text-transform:uppercase;letter-spacing:.07em}
+.rules-content p{margin-bottom:8px}
+.rules-content ol,.rules-content ul{padding-left:18px;margin-bottom:8px}
+.rules-content li{margin-bottom:3px}
 
-  /* Checkbox aceite */
-  .agree-wrap{display:flex;align-items:flex-start;gap:12px;margin-top:18px;padding:14px 16px;background:rgba(255,216,77,.06);border:1px solid rgba(255,216,77,.25);border-radius:12px;cursor:pointer;transition:background .15s}
-  .agree-wrap:hover{background:rgba(255,216,77,.10)}
-  .agree-check{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--gold);cursor:pointer}
-  .agree-label{font-size:13px;color:#d7ece1;cursor:pointer;line-height:1.5;margin:0}
-  .agree-label strong{color:var(--gold)}
+/* Checkbox aceite */
+.agree-wrap{display:flex;align-items:flex-start;gap:12px;margin-top:18px;padding:14px 16px;background:rgba(255,216,77,.06);border:1px solid rgba(255,216,77,.25);border-radius:12px;cursor:pointer;transition:background .15s}
+.agree-wrap:hover{background:rgba(255,216,77,.10)}
+.agree-check{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--gold);cursor:pointer}
+.agree-label{font-size:13px;color:#d7ece1;cursor:pointer;line-height:1.5;margin:0}
+.agree-label strong{color:var(--gold)}
+
+/* Loading spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+.vagas-iniciando{font-size:13px;color:var(--muted);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <img src="COPA-TGJOGO.png" alt="Número da Sorte Copa TGJOGO" class="logo-img" />
-    <p>Escolha seu número da sorte e participe do sorteio especial da Copa!</p>
-  </header>
+<header>
+<img src="COPA-TGJOGO.png" alt="NÃºmero da Sorte Copa TGJOGO" class="logo-img" />
+<p>Escolha seu nÃºmero da sorte e participe do sorteio especial da Copa!</p>
+</header>
 
-  <!-- REGULAMENTO -->
-  <div class="rules-card">
-    <button class="rules-toggle" id="rulesToggle" onclick="toggleRules()">
-      📋 Regulamento do Evento
-      <span class="arrow">▼</span>
-    </button>
-    <div class="rules-body" id="rulesBody">
-      <div class="rules-content">
+<!-- REGULAMENTO -->
+<div class="rules-card">
+<button class="rules-toggle" id="rulesToggle" onclick="toggleRules()">
+ð Regulamento do Evento
+<span class="arrow">â¼</span>
+</button>
+<div class="rules-body" id="rulesBody">
+<div class="rules-content">
 
-        <h3>1. Sobre o Evento</h3>
-        <p>O evento "Número da Sorte Copa TGJOGO" é uma ação promocional criada para os jogadores da TGJOGO durante o período da Copa. O participante poderá escolher um número disponível no site oficial do evento, informar seus dados corretamente e confirmar sua participação no sorteio.</p>
+<h3>1. Sobre o Evento</h3>
+<p>O evento "NÃºmero da Sorte Copa TGJOGO" Ã© uma aÃ§Ã£o promocional criada para os jogadores da TGJOGO durante o perÃ­odo da Copa. O participante poderÃ¡ escolher um nÃºmero disponÃ­vel no site oficial do evento, informar seus dados corretamente e confirmar sua participaÃ§Ã£o no sorteio.</p>
 
-        <h3>2. Como Participar</h3>
-        <p>Para participar, o jogador deverá:</p>
-        <ol>
-          <li>Acessar o site oficial do evento;</li>
-          <li>Escolher um número disponível;</li>
-          <li>Informar corretamente o ID da sua conta TGJOGO;</li>
-          <li>Informar o nome completo;</li>
-          <li>Informar corretamente o @ do Telegram;</li>
-          <li>Confirmar a participação;</li>
-          <li>Aguardar a confirmação do registro.</li>
-        </ol>
-        <p>O nome completo, o ID TGJOGO e o @ do Telegram deverão estar corretos para que a equipe consiga validar as informações do participante. Após a confirmação no site, o número escolhido ficará vinculado ao ID informado. O participante será direcionado para um link do Telegram para confirmar e salvar suas informações.</p>
+<h3>2. Como Participar</h3>
+<p>Para participar, o jogador deverÃ¡:</p>
+<ol>
+<li>Acessar o site oficial do evento;</li>
+<li>Escolher um nÃºmero disponÃ­vel;</li>
+<li>Informar corretamente o ID da sua conta TGJOGO;</li>
+<li>Informar o nome completo;</li>
+<li>Informar corretamente o @ do Telegram;</li>
+<li>Confirmar a participaÃ§Ã£o;</li>
+<li>Aguardar a confirmaÃ§Ã£o do registro.</li>
+</ol>
+<p>O nome completo, o ID TGJOGO e o @ do Telegram deverÃ£o estar corretos para que a equipe consiga validar as informaÃ§Ãµes do participante. ApÃ³s a confirmaÃ§Ã£o no site, o nÃºmero escolhido ficarÃ¡ vinculado ao ID informado. O participante serÃ¡ direcionado para um link do Telegram para confirmar e salvar suas informaÃ§Ãµes.</p>
 
-        <h3>3. Limite de Participação</h3>
-        <p>Cada ID de jogador poderá escolher apenas <strong>1 número</strong> durante a campanha. Caso seja identificado que o mesmo jogador tentou participar usando múltiplos IDs, contas duplicadas, informações falsas ou qualquer tentativa de fraude, a participação poderá ser cancelada pela equipe da TGJOGO.</p>
+<h3>3. Limite de ParticipaÃ§Ã£o</h3>
+<p>Cada ID de jogador poderÃ¡ escolher apenas <strong>1 nÃºmero</strong> durante a campanha. Caso seja identificado que o mesmo jogador tentou participar usando mÃºltiplos IDs, contas duplicadas, informaÃ§Ãµes falsas ou qualquer tentativa de fraude, a participaÃ§Ã£o poderÃ¡ ser cancelada pela equipe da TGJOGO.</p>
 
-        <h3>4. Escolha do Número</h3>
-        <p>Os números serão disponibilizados no site oficial do evento. Após o jogador escolher e confirmar um número, esse número ficará reservado para o ID informado. Números já escolhidos por outros participantes não poderão ser selecionados novamente e ficarão marcados em <strong style="color:var(--conf)">vermelho</strong> no site.</p>
+<h3>4. Escolha do NÃºmero</h3>
+<p>Os nÃºmeros serÃ£o disponibilizados no site oficial do evento. ApÃ³s o jogador escolher e confirmar um nÃºmero, esse nÃºmero ficarÃ¡ reservado para o ID informado. NÃºmeros jÃ¡ escolhidos por outros participantes nÃ£o poderÃ£o ser selecionados novamente e ficarÃ£o marcados em <strong style="color:var(--conf)">vermelho</strong> no site.</p>
 
-        <h3>5. Informações Incorretas</h3>
-        <p>O jogador é responsável por informar corretamente todos os dados solicitados, incluindo ID TGJOGO, nome completo e @ do Telegram. Caso as informações estejam incorretas, incompletas ou inválidas, a participação poderá ser cancelada. A TGJOGO não se responsabiliza por erros causados pelo preenchimento incorreto dos dados.</p>
+<h3>5. InformaÃ§Ãµes Incorretas</h3>
+<p>O jogador Ã© responsÃ¡vel por informar corretamente todos os dados solicitados, incluindo ID TGJOGO, nome completo e @ do Telegram. Caso as informaÃ§Ãµes estejam incorretas, incompletas ou invÃ¡lidas, a participaÃ§Ã£o poderÃ¡ ser cancelada. A TGJOGO nÃ£o se responsabiliza por erros causados pelo preenchimento incorreto dos dados.</p>
 
-        <h3>6. Confirmação da Participação</h3>
-        <p>Após a escolha do número e envio das informações, a participação será registrada automaticamente no sistema da campanha. A equipe da TGJOGO poderá verificar os dados antes da confirmação final. Somente números registrados, válidos e vinculados corretamente ao ID do participante estarão aptos para o sorteio.</p>
+<h3>6. ConfirmaÃ§Ã£o da ParticipaÃ§Ã£o</h3>
+<p>ApÃ³s a escolha do nÃºmero e envio das informaÃ§Ãµes, a participaÃ§Ã£o serÃ¡ registrada automaticamente no sistema da campanha. A equipe da TGJOGO poderÃ¡ verificar os dados antes da confirmaÃ§Ã£o final. Somente nÃºmeros registrados, vÃ¡lidos e vinculados corretamente ao ID do participante estarÃ£o aptos para o sorteio.</p>
 
-        <h3>7. Sorteio</h3>
-        <p>O sorteio será realizado na data e horário informados pela TGJOGO nos canais oficiais. O número vencedor será divulgado no Telegram oficial da TGJOGO ou em outro canal oficial informado pela equipe.</p>
+<h3>7. Sorteio</h3>
+<p>O sorteio serÃ¡ realizado na data e horÃ¡rio informados pela TGJOGO nos canais oficiais. O nÃºmero vencedor serÃ¡ divulgado no Telegram oficial da TGJOGO ou em outro canal oficial informado pela equipe.</p>
 
-        <h3>8. Premiação</h3>
-        <p>A premiação será definida e divulgada pela TGJOGO antes da realização do sorteio. O prêmio será entregue somente ao jogador que tiver o ID corretamente vinculado ao número sorteado. A TGJOGO poderá solicitar confirmação dos dados do participante, incluindo verificação de depósito, caso necessário para validação.</p>
+<h3>8. PremiaÃ§Ã£o</h3>
+<p>A premiaÃ§Ã£o serÃ¡ definida e divulgada pela TGJOGO antes da realizaÃ§Ã£o do sorteio. O prÃªmio serÃ¡ entregue somente ao jogador que tiver o ID corretamente vinculado ao nÃºmero sorteado. A TGJOGO poderÃ¡ solicitar confirmaÃ§Ã£o dos dados do participante, incluindo verificaÃ§Ã£o de depÃ³sito, caso necessÃ¡rio para validaÃ§Ã£o.</p>
 
-        <h3>9. Desclassificação</h3>
-        <p>O participante poderá ser desclassificado caso seja identificado:</p>
-        <ul>
-          <li>Uso de ID falso, inválido ou pertencente a outro jogador;</li>
-          <li>Uso de nome completo incorreto ou incompatível com a conta;</li>
-          <li>Uso de @ do Telegram incorreto, falso ou pertencente a outra pessoa;</li>
-          <li>Tentativa de registrar mais de um número usando o mesmo ID;</li>
-          <li>Uso de múltiplas contas para obter vantagem;</li>
-          <li>Manipulação, fraude ou abuso da campanha;</li>
-          <li>Informações falsas, incompletas ou divergentes;</li>
-          <li>Qualquer atitude considerada irregular pela equipe da TGJOGO.</li>
-        </ul>
+<h3>9. DesclassificaÃ§Ã£o</h3>
+<p>O participante poderÃ¡ ser desclassificado caso seja identificado:</p>
+<ul>
+<li>Uso de ID falso, invÃ¡lido ou pertencente a outro jogador;</li>
+<li>Uso de nome completo incorreto ou incompatÃ­vel com a conta;</li>
+<li>Uso de @ do Telegram incorreto, falso ou pertencente a outra pessoa;</li>
+<li>Tentativa de registrar mais de um nÃºmero usando o mesmo ID;</li>
+<li>Uso de mÃºltiplas contas para obter vantagem;</li>
+<li>ManipulaÃ§Ã£o, fraude ou abuso da campanha;</li>
+<li>InformaÃ§Ãµes falsas, incompletas ou divergentes;</li>
+<li>Qualquer atitude considerada irregular pela equipe da TGJOGO.</li>
+</ul>
 
-        <h3>10. Alterações no Evento</h3>
-        <p>A TGJOGO poderá alterar datas, horários, regras, prêmios ou condições do evento caso seja necessário, sempre comunicando os participantes pelos canais oficiais.</p>
+<h3>10. AlteraÃ§Ãµes no Evento</h3>
+<p>A TGJOGO poderÃ¡ alterar datas, horÃ¡rios, regras, prÃªmios ou condiÃ§Ãµes do evento caso seja necessÃ¡rio, sempre comunicando os participantes pelos canais oficiais.</p>
 
-        <h3>11. Aceitação das Regras</h3>
-        <p>Ao escolher um número e confirmar a participação, o jogador declara que leu, entendeu e concorda com todas as regras deste regulamento.</p>
+<h3>11. AceitaÃ§Ã£o das Regras</h3>
+<p>Ao escolher um nÃºmero e confirmar a participaÃ§Ã£o, o jogador declara que leu, entendeu e concorda com todas as regras deste regulamento.</p>
 
-        <h3>12. Canais Oficiais</h3>
-        <p>Todas as informações sobre o evento, sorteio, resultados e premiações serão divulgadas nos canais oficiais da TGJOGO.</p>
+<h3>12. Canais Oficiais</h3>
+<p>Todas as informaÃ§Ãµes sobre o evento, sorteio, resultados e premiaÃ§Ãµes serÃ£o divulgadas nos canais oficiais da TGJOGO.</p>
 
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+</div>
 
-  <section class="card" id="painel">
-    <h2><span class="step-num">1</span> Escolha seu número</h2>
-    <div class="hint">Toque em um número disponível (verde). <span class="sel-info" id="selInfo"></span></div>
-    <div class="vagas-bar" id="vagasBar">Carregando...</div>
-    <div class="grid" id="grid"></div>
-    <div class="legend">
-      <span><i class="dot" style="background:var(--livre)"></i> Disponível</span>
-      <span><i class="dot" style="background:var(--conf)"></i> Reservado</span>
-      <span><i class="dot" style="background:var(--gold)"></i> Selecionado</span>
-    </div>
+<section class="card" id="painel">
+<h2><span class="step-num">1</span> Escolha seu nÃºmero</h2>
+<div class="hint">Toque em um nÃºmero disponÃ­vel (verde). <span class="sel-info" id="selInfo"></span></div>
+<div class="vagas-bar" id="vagasBar"><span class="spinner"></span> Carregando...</div>
+<div class="grid" id="grid"></div>
+<div class="legend">
+<span><i class="dot" style="background:var(--livre)"></i> DisponÃ­vel</span>
+<span><i class="dot" style="background:var(--conf)"></i> Reservado</span>
+<span><i class="dot" style="background:var(--gold)"></i> Selecionado</span>
+</div>
 
-    <h2 style="margin-top:22px"><span class="step-num">2</span> Preencha seus dados</h2>
-    <label>ID de jogador TGJOGO</label>
-    <input type="text" id="playerId" placeholder="Ex: Joaozin5, 123456, @joao#" maxlength="40" autocomplete="off" />
-    <label>Seu nome real</label>
-    <input type="text" id="nomeReal" placeholder="Ex: João da Silva" maxlength="60" autocomplete="off" />
-    <label>Seu nome/usuário no Telegram</label>
-    <input type="text" id="tgNome" placeholder="Ex: @joaosilva" maxlength="40" autocomplete="off" />
+<h2 style="margin-top:22px"><span class="step-num">2</span> Preencha seus dados</h2>
+<label>ID de jogador TGJOGO</label>
+<input type="text" id="playerId" placeholder="Ex: Joaozin5, 123456, @joao#" maxlength="40" autocomplete="off" />
+<label>Seu nome real</label>
+<input type="text" id="nomeReal" placeholder="Ex: JoÃ£o da Silva" maxlength="60" autocomplete="off" />
+<label>Seu nome/usuÃ¡rio no Telegram</label>
+<input type="text" id="tgNome" placeholder="Ex: @joaosilva" maxlength="40" autocomplete="off" />
 
-    <!-- ACEITE DO REGULAMENTO -->
-    <div class="agree-wrap" id="agreeWrap" onclick="toggleAgree()">
-      <input type="checkbox" class="agree-check" id="agreeCheck" onclick="event.stopPropagation();valida()" />
-      <label class="agree-label" for="agreeCheck">
-        Li e concordo com o <strong>Regulamento do Número da Sorte Copa TGJOGO</strong>.
-        Declaro que todas as informações preenchidas são verdadeiras.
-      </label>
-    </div>
+<!-- ACEITE DO REGULAMENTO -->
+<div class="agree-wrap" id="agreeWrap" onclick="toggleAgree()">
+<input type="checkbox" class="agree-check" id="agreeCheck" onclick="event.stopPropagation();valida()" />
+<label class="agree-label" for="agreeCheck">
+Li e concordo com o <strong>Regulamento do NÃºmero da Sorte Copa TGJOGO</strong>.
+Declaro que todas as informaÃ§Ãµes preenchidas sÃ£o verdadeiras.
+</label>
+</div>
 
-    <button class="btn-gold" id="btnConfirmar" disabled>✅ Confirmar participação</button>
-    <div class="msg" id="msg"></div>
-  </section>
+<button class="btn-gold" id="btnConfirmar" disabled>â Confirmar participaÃ§Ã£o</button>
+<div class="msg" id="msg"></div>
+</section>
 
-  <section class="card sucesso" id="sucesso">
-    <h2 style="justify-content:center">Participação registrada! 🍀</h2>
-    <div>Seu número da sorte é</div>
-    <div class="big-num" id="numFinal">--</div>
-    <div class="resumo" id="resumo"></div>
-    <a id="btnTelegram" href="#" target="_blank" rel="noopener">
-      <button class="btn-gold" style="margin-top:18px">📲 Receber confirmação no Telegram</button>
-    </a>
-    <p style="margin-top:12px;font-size:13px;color:#d7ece1">Toque acima e aperte <strong>Iniciar</strong> no bot para receber sua confirmação.</p>
-  </section>
+<section class="card sucesso" id="sucesso">
+<h2 style="justify-content:center">ParticipaÃ§Ã£o registrada! ð</h2>
+<div>Seu nÃºmero da sorte Ã©</div>
+<div class="big-num" id="numFinal">--</div>
+<div class="resumo" id="resumo"></div>
+<a id="btnTelegram" href="#" target="_blank" rel="noopener">
+<button class="btn-gold" style="margin-top:18px">ð² Receber confirmaÃ§Ã£o no Telegram</button>
+</a>
+<p style="margin-top:12px;font-size:13px;color:#d7ece1">Toque acima e aperte <strong>Iniciar</strong> no bot para receber sua confirmaÃ§Ã£o.</p>
+</section>
 
-  <footer>Número da Sorte · Copa TGJOGO — sorteio promocional</footer>
+<footer>NÃºmero da Sorte Â· Copa TGJOGO â sorteio promocional</footer>
 </div>
 
 <script>
-  const API_BASE = "";
-  const $ = (id) => document.getElementById(id);
-  let escolhido = null;
-  let ocupados = {};
+const API_BASE = "";
+const $ = (id) => document.getElementById(id);
+let escolhido = null;
+let ocupados = {};
+let totalNumeros = 100;
 
-  function toggleRules(){
-    $("rulesToggle").classList.toggle("open");
-    $("rulesBody").classList.toggle("open");
+function toggleRules(){
+$("rulesToggle").classList.toggle("open");
+$("rulesBody").classList.toggle("open");
+}
+
+function toggleAgree(){
+const cb = $("agreeCheck");
+cb.checked = !cb.checked;
+valida();
+}
+
+function showMsg(t){ const m=$("msg"); m.textContent=t; m.className="msg erro"; }
+function limpaMsg(){ $("msg").className="msg"; }
+
+// ------------------------------------------------------------
+// carregarGrade com detecÃ§Ã£o de cold start e retry automÃ¡tico
+// ------------------------------------------------------------
+async function carregarGrade(tentativa = 1){
+const vagasBar = $("vagasBar");
+
+// ApÃ³s 2.5s sem resposta, avisa que o servidor estÃ¡ iniciando
+const slowTimer = setTimeout(() => {
+  if(vagasBar) vagasBar.innerHTML =
+    '<span class="spinner"></span>' +
+    '<span class="vagas-iniciando">Servidor iniciando, aguarde alguns segundosâ¦</span>';
+}, 2500);
+
+try{
+  const r = await fetch(API_BASE + "/api/grade");
+  clearTimeout(slowTimer);
+  const data = await r.json();
+  if(!data.ok) return;
+  ocupados = {};
+  data.grade.forEach(g => { if(g.status!=="disponivel") ocupados[g.numero]=g.status; });
+  totalNumeros = data.grade.length;
+  const livres = data.grade.filter(g => g.status === "disponivel").length;
+  if(vagasBar){
+    vagasBar.innerHTML = '<span class="vagas-num">'+livres+'</span> de '+totalNumeros+' nÃºmeros disponÃ­veis';
+    vagasBar.classList.toggle("vagas-urgente", livres <= 20);
   }
-
-  function toggleAgree(){
-    const cb = $("agreeCheck");
-    cb.checked = !cb.checked;
-    valida();
+  desenha(totalNumeros);
+}catch(e){
+  clearTimeout(slowTimer);
+  if(tentativa < 4){
+    const restantes = 4 - tentativa;
+    if(vagasBar) vagasBar.innerHTML =
+      '<span class="spinner"></span>' +
+      '<span class="vagas-iniciando">Servidor iniciandoâ¦ tentativa ' + tentativa + '/3. Aguarde.</span>';
+    setTimeout(() => carregarGrade(tentativa + 1), 6000);
+  } else {
+    if(vagasBar) vagasBar.textContent = "NÃ£o foi possÃ­vel carregar. Recarregue a pÃ¡gina.";
+    $("grid").innerHTML = "<div style='grid-column:1/-1;color:var(--muted);text-align:center;padding:10px'>NÃ£o foi possÃ­vel conectar ao servidor. Aguarde e tente novamente.</div>";
   }
+}
+}
 
-  function showMsg(t){ const m=$("msg"); m.textContent=t; m.className="msg erro"; }
-  function limpaMsg(){ $("msg").className="msg"; }
+function desenha(total){
+const grid = $("grid"); grid.innerHTML="";
+for(let n=1;n<=total;n++){
+const d=document.createElement("div");
+let cls="cell ";
+if(ocupados[n]) cls+="reservado";
+else if(escolhido===n) cls+="sel";
+else cls+="livre";
+d.className=cls;
+d.textContent=String(n).padStart(2,"0");
+if(!ocupados[n]){
+d.onclick=()=>{ escolhido=n; $("selInfo").textContent="NÃºmero "+String(n).padStart(2,"0")+" selecionado."; desenha(total); valida(); };
+}
+grid.appendChild(d);
+}
+}
 
-  async function carregarGrade(){
-    try{
-      const r = await fetch(API_BASE + "/api/grade");
-      const data = await r.json();
-      if(!data.ok) return;
-      ocupados = {};
-      data.grade.forEach(g => { if(g.status!=="disponivel") ocupados[g.numero]=g.status; });
-      const livres = data.grade.filter(g => g.status === "disponivel").length;
-      const vagasBar = $("vagasBar");
-      if(vagasBar){ vagasBar.innerHTML = '<span class="vagas-num">'+livres+'</span> de '+data.grade.length+' números disponíveis'; vagasBar.classList.toggle("vagas-urgente", livres <= 20); }
-      desenha(data.grade.length);
-    }catch(e){
-      $("grid").innerHTML = "<div style='grid-column:1/-1;color:var(--muted);text-align:center;padding:10px'>Não foi possível carregar a grade. Verifique o servidor.</div>";
-    }
-  }
+function valida(){
+const id=$("playerId").value.trim();
+const nome=$("nomeReal").value.trim();
+const tg=$("tgNome").value.trim();
+const agree=$("agreeCheck").checked;
+const ok = escolhido && id.length>=1 && id.length<=40 && nome.length>=3 && tg.length>=2 && agree;
+$("btnConfirmar").disabled = !ok;
+}
+["playerId","nomeReal","tgNome"].forEach(id=>$(id).addEventListener("input",valida));
 
-  function desenha(total){
-    const grid = $("grid"); grid.innerHTML="";
-    for(let n=1;n<=total;n++){
-      const d=document.createElement("div");
-      let cls="cell ";
-      if(ocupados[n]) cls+="reservado";
-      else if(escolhido===n) cls+="sel";
-      else cls+="livre";
-      d.className=cls;
-      d.textContent=String(n).padStart(2,"0");
-      if(!ocupados[n]){
-        d.onclick=()=>{ escolhido=n; $("selInfo").textContent="Número "+String(n).padStart(2,"0")+" selecionado."; desenha(total); valida(); };
-      }
-      grid.appendChild(d);
-    }
-  }
+async function confirmar(){
+limpaMsg();
+const playerId=$("playerId").value.trim();
+const nomeReal=$("nomeReal").value.trim();
+const telegramNome=$("tgNome").value.trim();
+if(!escolhido){ showMsg("Escolha um nÃºmero na grade."); return; }
+if(playerId.length<1 || playerId.length>40){ showMsg("Informe seu ID de jogador."); return; }
+if(nomeReal.length<3){ showMsg("Informe seu nome real."); return; }
+if(telegramNome.length<2){ showMsg("Informe seu nome no Telegram."); return; }
+if(!$("agreeCheck").checked){ showMsg("VocÃª precisa aceitar o regulamento para participar."); return; }
 
-  function valida(){
-    const id=$("playerId").value.trim();
-    const nome=$("nomeReal").value.trim();
-    const tg=$("tgNome").value.trim();
-    const agree=$("agreeCheck").checked;
-    const ok = escolhido && id.length>=1 && id.length<=40 && nome.length>=3 && tg.length>=2 && agree;
-    $("btnConfirmar").disabled = !ok;
-  }
-  ["playerId","nomeReal","tgNome"].forEach(id=>$(id).addEventListener("input",valida));
+$("btnConfirmar").disabled=true; $("btnConfirmar").textContent="Confirmando...";
+try{
+const r=await fetch(API_BASE+"/api/confirmar",{
+method:"POST", headers:{"Content-Type":"application/json"},
+body:JSON.stringify({numero:escolhido,playerId,nomeReal,telegramNome})
+});
+const data=await r.json();
+if(!data.ok){
+showMsg(data.erro||"NÃ£o foi possÃ­vel confirmar.");
+$("btnConfirmar").disabled=false; $("btnConfirmar").textContent="â Confirmar participaÃ§Ã£o";
+carregarGrade();
+return;
+}
+$("painel").classList.add("hidden");
+$("numFinal").textContent=String(data.numero).padStart(2,"0");
+$("resumo").innerHTML="ID: <strong>"+data.playerId+"</strong><br/>Nome: <strong>"+data.nomeReal+"</strong><br/>Telegram: <strong>"+data.telegramNome+"</strong>";
+$("btnTelegram").href=data.telegramLink;
+$("sucesso").classList.add("show");
+if(typeof confetti==="function"){ confetti({particleCount:150,spread:80,origin:{y:0.5}}); setTimeout(()=>confetti({particleCount:80,angle:60,spread:55,origin:{x:0,y:0.6}}),400); setTimeout(()=>confetti({particleCount:80,angle:120,spread:55,origin:{x:1,y:0.6}}),700); }
+}catch(e){
+showMsg("Erro de conexÃ£o. Tente novamente.");
+$("btnConfirmar").disabled=false; $("btnConfirmar").textContent="â Confirmar participaÃ§Ã£o";
+}
+}
+$("btnConfirmar").onclick=confirmar;
 
-  async function confirmar(){
-    limpaMsg();
-    const playerId=$("playerId").value.trim();
-    const nomeReal=$("nomeReal").value.trim();
-    const telegramNome=$("tgNome").value.trim();
-    if(!escolhido){ showMsg("Escolha um número na grade."); return; }
-    if(playerId.length<1 || playerId.length>40){ showMsg("Informe seu ID de jogador."); return; }
-    if(nomeReal.length<3){ showMsg("Informe seu nome real."); return; }
-    if(telegramNome.length<2){ showMsg("Informe seu nome no Telegram."); return; }
-    if(!$("agreeCheck").checked){ showMsg("Você precisa aceitar o regulamento para participar."); return; }
+carregarGrade();
 
-    $("btnConfirmar").disabled=true; $("btnConfirmar").textContent="Confirmando...";
-    try{
-      const r=await fetch(API_BASE+"/api/confirmar",{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({numero:escolhido,playerId,nomeReal,telegramNome})
-      });
-      const data=await r.json();
-      if(!data.ok){
-        showMsg(data.erro||"Não foi possível confirmar.");
-        $("btnConfirmar").disabled=false; $("btnConfirmar").textContent="✅ Confirmar participação";
-        carregarGrade();
-        return;
-      }
-      $("painel").classList.add("hidden");
-      $("numFinal").textContent=String(data.numero).padStart(2,"0");
-      $("resumo").innerHTML="ID: <strong>"+data.playerId+"</strong><br/>Nome: <strong>"+data.nomeReal+"</strong><br/>Telegram: <strong>"+data.telegramNome+"</strong>";
-      $("btnTelegram").href=data.telegramLink;
-      $("sucesso").classList.add("show");
-      if(typeof confetti==="function"){ confetti({particleCount:150,spread:80,origin:{y:0.5}}); setTimeout(()=>confetti({particleCount:80,angle:60,spread:55,origin:{x:0,y:0.6}}),400); setTimeout(()=>confetti({particleCount:80,angle:120,spread:55,origin:{x:1,y:0.6}}),700); }
-    }catch(e){
-      showMsg("Erro de conexão. Tente novamente.");
-      $("btnConfirmar").disabled=false; $("btnConfirmar").textContent="✅ Confirmar participação";
-    }
-  }
-  $("btnConfirmar").onclick=confirmar;
-
-  carregarGrade();
-
-  // Auto-refresh da grade a cada 30 segundos
-  setInterval(async () => {
-    try{
-      const r = await fetch(API_BASE + "/api/grade");
-      const data = await r.json();
-      if(!data.ok) return;
-      const novosOcupados = {};
-      data.grade.forEach(g => { if(g.status!=="disponivel") novosOcupados[g.numero]=g.status; });
-      if(escolhido && novosOcupados[escolhido]){
-        escolhido = null;
-        $("selInfo").textContent = "";
-        showMsg("O número que você selecionou foi reservado por outra pessoa. Escolha outro.");
-      }
-      ocupados = novosOcupados;
-      desenha(data.grade.length);
-    }catch(e){ /* silencioso */ }
-  }, 30000);
+// Auto-refresh da grade a cada 30 segundos
+setInterval(async () => {
+try{
+const r = await fetch(API_BASE + "/api/grade");
+const data = await r.json();
+if(!data.ok) return;
+const novosOcupados = {};
+data.grade.forEach(g => { if(g.status!=="disponivel") novosOcupados[g.numero]=g.status; });
+if(escolhido && novosOcupados[escolhido]){
+escolhido = null;
+$("selInfo").textContent = "";
+showMsg("O nÃºmero que vocÃª selecionou foi reservado por outra pessoa. Escolha outro.");
+}
+ocupados = novosOcupados;
+desenha(totalNumeros);
+}catch(e){ /* silencioso */ }
+}, 30000);
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
 </body>
