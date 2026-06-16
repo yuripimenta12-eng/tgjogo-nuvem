@@ -40,14 +40,14 @@ process.exit(1);
 function sanitizar(s) {
 if (typeof s !== "string") return "";
 return s
-.replace(/<[^>]*>/g, "")
-.replace(/[<>&"']/g, "")
-.replace(/[\x00-\x1F\x7F]/g, "")
-.trim();
+  .replace(/<[^>]*>/g, "")
+  .replace(/[<>&"']/g, "")
+  .replace(/[\x00-\x1F\x7F]/g, "")
+  .trim();
 }
 
 // --------------------------------------------------------------------
-// ARMAZENAMENTO — Upstash Redis (permanente) ou arquivo JSON (local)
+// ARMAZENAMENTO â Upstash Redis (permanente) ou arquivo JSON (local)
 // --------------------------------------------------------------------
 const DB_FILE = "campanha.json";
 const REDIS_KEY = "tgjogo:reservas";
@@ -55,7 +55,7 @@ const usandoRedis = !!(UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN);
 
 async function redisGet(key) {
 const r = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${key}`, {
-headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
+  headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
 });
 const json = await r.json();
 if (!json.result) return null;
@@ -65,49 +65,49 @@ return typeof first === "string" ? JSON.parse(first) : first;
 
 async function redisSet(key, value) {
 await fetch(`${UPSTASH_REDIS_REST_URL}/set/${key}`, {
-method: "POST",
-headers: {
-Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
-"Content-Type": "application/json",
-},
-body: JSON.stringify(JSON.stringify(value)),
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(JSON.stringify(value)),
 });
 }
 
 async function carregarReservas() {
 if (usandoRedis) {
-try {
-const data = await redisGet(REDIS_KEY);
-console.log("[Redis] Reservas carregadas:", (data || []).length);
-return data || [];
-} catch (e) {
-console.error("[Redis] Erro ao carregar, usando arquivo local:", e.message);
+  try {
+    const data = await redisGet(REDIS_KEY);
+    console.log("[Redis] Reservas carregadas:", (data || []).length);
+    return data || [];
+  } catch (e) {
+    console.error("[Redis] Erro ao carregar, usando arquivo local:", e.message);
+  }
 }
-}
 try {
-return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+  return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
 } catch {
-return [];
+  return [];
 }
 }
 
 async function salvarReservas(lista) {
 if (usandoRedis) {
-try {
-await redisSet(REDIS_KEY, lista);
-return;
-} catch (e) {
-console.error("[Redis] Erro ao salvar, salvando em arquivo:", e.message);
-}
+  try {
+    await redisSet(REDIS_KEY, lista);
+    return;
+  } catch (e) {
+    console.error("[Redis] Erro ao salvar, salvando em arquivo:", e.message);
+  }
 }
 fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 }
 
 let reservas = await carregarReservas();
 if (usandoRedis) {
-console.log("[Storage] Usando Upstash Redis — dados persistentes.");
+console.log("[Storage] Usando Upstash Redis â dados persistentes.");
 } else {
-console.warn("[Storage] Upstash nao configurado — usando arquivo local.");
+console.warn("[Storage] Upstash nao configurado â usando arquivo local.");
 }
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
@@ -124,18 +124,18 @@ function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.leng
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM (modo webhook — sem conflito 409 entre deploys)
+// BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
 const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
-const WEBHOOK_URL  = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
+const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
 try {
-  await bot.setWebHook(WEBHOOK_URL, { drop_pending_updates: true });
-  console.log("[Bot] Webhook configurado:", WEBHOOK_URL.replace(TELEGRAM_BOT_TOKEN, "***"));
+await bot.setWebHook(WEBHOOK_URL, { drop_pending_updates: true });
+console.log("[Bot] Webhook configurado:", WEBHOOK_URL.replace(TELEGRAM_BOT_TOKEN, "***"));
 } catch (e) {
-  console.warn("[Bot] Erro ao configurar webhook:", e.message);
+console.warn("[Bot] Erro ao configurar webhook:", e.message);
 }
 
 const username = (await bot.getMe()).username;
@@ -146,14 +146,14 @@ const chatId = msg.chat.id;
 const token = match && match[1] ? match[1].trim() : null;
 
 if (!token) {
-bot.sendMessage(chatId, "Ola! Para receber a confirmacao do seu numero da sorte, use o botao que aparece no site depois de confirmar sua participacao.");
-return;
+  bot.sendMessage(chatId, "Ola! Para receber a confirmacao do seu numero da sorte, use o botao que aparece no site depois de confirmar sua participacao.");
+  return;
 }
 
 const reserva = acharPorToken(token);
 if (!reserva) {
-bot.sendMessage(chatId, "Nao encontrei essa participacao. Confirme novamente no site.");
-return;
+  bot.sendMessage(chatId, "Nao encontrei essa participacao. Confirme novamente no site.");
+  return;
 }
 
 reserva.telegram_chat = chatId;
@@ -161,51 +161,51 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-`Participacao confirmada! 🍀\n\n` +
-`🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
-`🎟️ Seu numero: ${numero}\n` +
-`🆔 ID do jogador: ${reserva.player_id}\n` +
-`👤 Nome: ${reserva.nome_real}\n` +
-`✅ Status: registrado\n\n` +
-`Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
+  `Participacao confirmada! ð\n\n` +
+  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
+  `ðï¸ Seu numero: ${numero}\n` +
+  `ð ID do jogador: ${reserva.player_id}\n` +
+  `ð¤ Nome: ${reserva.nome_real}\n` +
+  `â Status: registrado\n\n` +
+  `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
 );
 });
 
 // --------------------------------------------------------------------
-// /meu_numero — jogador consulta seu numero pelo bot
+// /meu_numero â jogador consulta seu numero pelo bot
 // --------------------------------------------------------------------
 bot.onText(/\/meu_numero/, async (msg) => {
 const chatId = msg.chat.id;
 let reserva = reservas.find((r) => r.telegram_chat === chatId);
 if (!reserva && msg.from.username) {
-const uname = "@" + msg.from.username;
-reserva = reservas.find((r) => r.telegram_nome.toLowerCase() === uname.toLowerCase());
+  const uname = "@" + msg.from.username;
+  reserva = reservas.find((r) => r.telegram_nome.toLowerCase() === uname.toLowerCase());
 }
 if (reserva) {
-const numero = String(reserva.numero).padStart(2, "0");
-bot.sendMessage(
-chatId,
-"🎯 Seu número da sorte é o *" + numero + "*!\n\n" +
-"👤 Nome: " + reserva.nome_real + "\n" +
-"🆔 ID: " + reserva.player_id + "\n\n" +
-"Boa sorte na Copa TGJOGO! ⚽",
-{ parse_mode: "Markdown" }
-);
+  const numero = String(reserva.numero).padStart(2, "0");
+  bot.sendMessage(
+    chatId,
+    "ð¯ Seu nÃºmero da sorte Ã© o *" + numero + "*!\n\n" +
+    "ð¤ Nome: " + reserva.nome_real + "\n" +
+    "ð ID: " + reserva.player_id + "\n\n" +
+    "Boa sorte na Copa TGJOGO! â½",
+    { parse_mode: "Markdown" }
+  );
 } else {
-bot.sendMessage(
-chatId,
-"❌ Você ainda não tem um número registrado.\n\n" +
-"Acesse o site e escolha o seu! 🎟️"
-);
+  bot.sendMessage(
+    chatId,
+    "â VocÃª ainda nÃ£o tem um nÃºmero registrado.\n\n" +
+    "Acesse o site e escolha o seu! ðï¸"
+  );
 }
 });
 
 function avisarGradeCheia() {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-`🎉 GRADE COMPLETA! - COPA TGJOGO\n\n` +
-`Todos os ${TOTAL} números foram preenchidos!\n\n` +
-`O sorteio pode ser realizado agora. 🏆`
+  `ð GRADE COMPLETA! - COPA TGJOGO\n\n` +
+  `Todos os ${TOTAL} nÃºmeros foram preenchidos!\n\n` +
+  `O sorteio pode ser realizado agora. ð`
 ).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
@@ -216,14 +216,14 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-`🎟️ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
-`Numero escolhido: ${numero}\n` +
-`ID do jogador: ${reserva.player_id}\n` +
-`Nome real: ${reserva.nome_real}\n` +
-`Telegram: ${reserva.telegram_nome}\n` +
-`Status: Participacao registrada\n` +
-`Data: ${data}\n` +
-`Hora: ${hora}`
+  `ðï¸ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
+  `Numero escolhido: ${numero}\n` +
+  `ID do jogador: ${reserva.player_id}\n` +
+  `Nome real: ${reserva.nome_real}\n` +
+  `Telegram: ${reserva.telegram_nome}\n` +
+  `Status: Participacao registrada\n` +
+  `Data: ${data}\n` +
+  `Hora: ${hora}`
 ).catch((e) => console.error("Erro ao avisar equipe:", e.message));
 }
 
@@ -257,18 +257,18 @@ message: { ok: false, erro: "Limite de confirmacoes atingido. Tente novamente em
 // --------------------------------------------------------------------
 function checkAdmin(req, res, next) {
 if (!ADMIN_PASSWORD) {
-return res.status(503).send("Painel admin nao configurado. Defina ADMIN_PASSWORD nas variaveis de ambiente do Render.");
+  return res.status(503).send("Painel admin nao configurado. Defina ADMIN_PASSWORD nas variaveis de ambiente do Render.");
 }
 const auth = req.headers["authorization"] || "";
 if (!auth.startsWith("Basic ")) {
-res.set("WWW-Authenticate", 'Basic realm="Admin Copa TGJOGO"');
-return res.status(401).send("Autenticacao necessaria.");
+  res.set("WWW-Authenticate", 'Basic realm="Admin Copa TGJOGO"');
+  return res.status(401).send("Autenticacao necessaria.");
 }
 const decoded = Buffer.from(auth.slice(6), "base64").toString();
 const senha = decoded.includes(":") ? decoded.split(":").slice(1).join(":") : decoded;
 if (senha !== ADMIN_PASSWORD) {
-res.set("WWW-Authenticate", 'Basic realm="Admin Copa TGJOGO"');
-return res.status(401).send("Senha incorreta.");
+  res.set("WWW-Authenticate", 'Basic realm="Admin Copa TGJOGO"');
+  return res.status(401).send("Senha incorreta.");
 }
 next();
 }
@@ -277,8 +277,16 @@ next();
 // ROTA WEBHOOK DO TELEGRAM (deve ficar antes do rate-limit geral)
 // --------------------------------------------------------------------
 app.post(WEBHOOK_PATH, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
+bot.processUpdate(req.body);
+res.sendStatus(200);
+});
+
+// --------------------------------------------------------------------
+// KEEP-ALIVE â usado por UptimeRobot ou similar para evitar cold start
+// Configure o monitor para pingar GET /ping a cada 5 minutos
+// --------------------------------------------------------------------
+app.get("/ping", (req, res) => {
+res.json({ ok: true, ts: Date.now(), inscritos: reservas.length, disponiveis: TOTAL - reservas.length });
 });
 
 // --------------------------------------------------------------------
@@ -293,7 +301,7 @@ const mapa = {};
 for (const r of reservas) mapa[r.numero] = r.status;
 const grade = [];
 for (let n = 1; n <= TOTAL; n++) {
-grade.push({ numero: n, status: mapa[n] || "disponivel" });
+  grade.push({ numero: n, status: mapa[n] || "disponivel" });
 }
 res.json({ ok: true, grade });
 });
@@ -311,23 +319,23 @@ if (!telegramValido(telegramNome)) return res.status(400).json({ ok: false, erro
 
 const jaRegistrado = acharPorPlayer(playerId);
 if (jaRegistrado) {
-const numExistente = String(jaRegistrado.numero).padStart(2, "0");
-return res.status(409).json({ ok: false, erro: `Este ID ja esta registrado com o numero ${numExistente}. Cada ID participa apenas uma vez.` });
+  const numExistente = String(jaRegistrado.numero).padStart(2, "0");
+  return res.status(409).json({ ok: false, erro: `Este ID ja esta registrado com o numero ${numExistente}. Cada ID participa apenas uma vez.` });
 }
 const jaUsouTelegram = reservas.find((r) => r.telegram_nome.toLowerCase() === telegramNome.toLowerCase());
 if (jaUsouTelegram) {
-const numExistente = String(jaUsouTelegram.numero).padStart(2, "0");
-return res.status(409).json({ ok: false, erro: `Este Telegram ja esta registrado com o numero ${numExistente}. Cada conta Telegram participa apenas uma vez.` });
+  const numExistente = String(jaUsouTelegram.numero).padStart(2, "0");
+  return res.status(409).json({ ok: false, erro: `Este Telegram ja esta registrado com o numero ${numExistente}. Cada conta Telegram participa apenas uma vez.` });
 }
 if (acharPorNumero(numero)) {
-return res.status(409).json({ ok: false, erro: "Este numero acabou de ser reservado por outra pessoa. Escolha outro." });
+  return res.status(409).json({ ok: false, erro: "Este numero acabou de ser reservado por outra pessoa. Escolha outro." });
 }
 
 const claimToken = crypto.randomBytes(16).toString("hex");
 const reserva = {
-numero, player_id: playerId, nome_real: nomeReal, telegram_nome: telegramNome,
-status: "confirmado", claim_token: claimToken, telegram_chat: null,
-criado_em: new Date().toISOString(),
+  numero, player_id: playerId, nome_real: nomeReal, telegram_nome: telegramNome,
+  status: "confirmado", claim_token: claimToken, telegram_chat: null,
+  criado_em: new Date().toISOString(),
 };
 reservas.push(reserva);
 await salvarReservas(reservas);
@@ -335,7 +343,7 @@ avisarEquipe(reserva);
 if (reservas.length === TOTAL) avisarGradeCheia();
 
 res.json({ ok: true, numero, playerId, nomeReal, telegramNome,
-telegramLink: `https://t.me/${username}?start=${claimToken}` });
+  telegramLink: `https://t.me/${username}?start=${claimToken}` });
 });
 
 // --------------------------------------------------------------------
@@ -343,28 +351,28 @@ telegramLink: `https://t.me/${username}?start=${claimToken}` });
 // --------------------------------------------------------------------
 app.get("/api/admin/participantes", checkAdmin, (req, res) => {
 const lista = reservas.map((r) => ({
-numero: String(r.numero).padStart(2, "0"),
-player_id: r.player_id,
-nome_real: r.nome_real,
-telegram_nome: r.telegram_nome,
-telegram_chat: r.telegram_chat ? "Confirmado no bot" : "Pendente",
-criado_em: new Date(r.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+  numero: String(r.numero).padStart(2, "0"),
+  player_id: r.player_id,
+  nome_real: r.nome_real,
+  telegram_nome: r.telegram_nome,
+  telegram_chat: r.telegram_chat ? "Confirmado no bot" : "Pendente",
+  criado_em: new Date(r.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
 }));
 res.json({ ok: true, total: lista.length, disponiveis: TOTAL - lista.length, participantes: lista });
 });
 
 app.get("/api/admin/exportar", checkAdmin, (req, res) => {
 const linhas = [
-"Numero,ID TGJOGO,Nome Real,Telegram,Bot Confirmado,Data/Hora",
-...reservas.map((r) =>
-[`"${String(r.numero).padStart(2,"0")}"`,
-`"${r.player_id}"`,
-`"${r.nome_real}"`,
-`"${r.telegram_nome}"`,
-r.telegram_chat ? "Sim" : "Nao",
-`"${new Date(r.criado_em).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}"`
-].join(",")
-),
+  "Numero,ID TGJOGO,Nome Real,Telegram,Bot Confirmado,Data/Hora",
+  ...reservas.map((r) =>
+    [`"${String(r.numero).padStart(2,"0")}"`,
+     `"${r.player_id}"`,
+     `"${r.nome_real}"`,
+     `"${r.telegram_nome}"`,
+     r.telegram_chat ? "Sim" : "Nao",
+     `"${new Date(r.criado_em).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}"`
+    ].join(",")
+  ),
 ].join("\n");
 res.set("Content-Type", "text/csv; charset=utf-8");
 res.set("Content-Disposition", 'attachment; filename="participantes-copa-tgjogo.csv"');
@@ -391,7 +399,7 @@ res.json({ ok: true, numero: num, player_id: removida.player_id });
 app.post("/api/admin/reset", checkAdmin, async (req, res) => {
 const confirmacao = req.body?.confirmacao;
 if (confirmacao !== "RESETAR") {
-return res.status(400).json({ ok: false, erro: 'Envie { "confirmacao": "RESETAR" } para confirmar.' });
+  return res.status(400).json({ ok: false, erro: 'Envie { "confirmacao": "RESETAR" } para confirmar.' });
 }
 reservas = [];
 await salvarReservas(reservas);
@@ -405,7 +413,7 @@ res.send(`<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin · Copa TGJOGO</title>
+<title>Admin Â· Copa TGJOGO</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",system-ui,sans-serif;background:#0b3d2e;color:#f0faf5;min-height:100vh;padding:24px 16px}
@@ -437,31 +445,31 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>🏆 Painel Admin · Copa TGJOGO</h1>
+<h1>ð Painel Admin Â· Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">—</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">—</div><div class="l">Disponíveis</div></div>
-<div class="stat"><div class="n" id="sBot">—</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
+<div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
 </div>
 
-<a class="btn" href="/api/admin/exportar">⬇️ Exportar CSV</a>
-<button class="btn-reset" onclick="resetarGrade()">🗑️ Resetar Grade</button>
+<a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
+<button class="btn-reset" onclick="resetarGrade()">ðï¸ Resetar Grade</button>
 
-<div class="refresh">🔄 Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()"/>
 
 <table>
 <thead>
 <tr>
-<th>Nº</th>
+<th>NÂº</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>Ações</th>
+<th>AÃ§Ãµes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -478,7 +486,7 @@ todos = d.participantes || [];
 document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
 filtrar();
 } catch(e) {
 document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
@@ -504,30 +512,30 @@ tbody.innerHTML = lista.map(p => \`<tr>
 <td>\${p.telegram_nome}</td>
 <td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
 <td>\${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">🗑️ Liberar</button></td>
+<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">ðï¸ Liberar</button></td>
 </tr>\`).join('');
 }
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o nÃºmero ' + n + '?\\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
 try {
 const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
-if (d.ok) { alert('✅ Número ' + n + ' liberado!'); carregar(); }
+if (d.ok) { alert('â NÃºmero ' + n + ' liberado!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexão.'); }
+} catch(e) { alert('Erro de conexÃ£o.'); }
 }
 
 async function resetarGrade() {
-if (!confirm('⚠️ ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\\n\\nTem certeza?')) return;
-if (!confirm('Segunda confirmação: realmente resetar toda a grade?')) return;
+if (!confirm('â ï¸ ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\\n\\nTem certeza?')) return;
+if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
 try {
 const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
 const d = await r.json();
-if (d.ok) { alert('✅ Grade resetada! Todos os números estão disponíveis.'); carregar(); }
+if (d.ok) { alert('â Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexão.'); }
+} catch(e) { alert('Erro de conexÃ£o.'); }
 }
 
 carregar();
@@ -540,6 +548,6 @@ setInterval(carregar, 30000);
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 });
