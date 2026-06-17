@@ -47,7 +47,7 @@ return s
 }
 
 // --------------------------------------------------------------------
-// ARMAZENAMENTO â Upstash Redis (permanente) ou arquivo JSON (local)
+// ARMAZENAMENTO Ã¢ÂÂ Upstash Redis (permanente) ou arquivo JSON (local)
 // --------------------------------------------------------------------
 const DB_FILE = "campanha.json";
 const REDIS_KEY = "tgjogo:reservas";
@@ -105,9 +105,9 @@ fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 
 let reservas = await carregarReservas();
 if (usandoRedis) {
-console.log("[Storage] Usando Upstash Redis â dados persistentes.");
+console.log("[Storage] Usando Upstash Redis Ã¢ÂÂ dados persistentes.");
 } else {
-console.warn("[Storage] Upstash nao configurado â usando arquivo local.");
+console.warn("[Storage] Upstash nao configurado Ã¢ÂÂ usando arquivo local.");
 }
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
@@ -124,7 +124,7 @@ function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.leng
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
+// BOT DO TELEGRAM (modo webhook Ã¢ÂÂ sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
 const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
 const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
@@ -161,18 +161,18 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada! ð\n\n` +
-  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
-  `ðï¸ Seu numero: ${numero}\n` +
-  `ð ID do jogador: ${reserva.player_id}\n` +
-  `ð¤ Nome: ${reserva.nome_real}\n` +
-  `â Status: registrado\n\n` +
+  `Participacao confirmada! Ã°ÂÂÂ\n\n` +
+  `Ã°ÂÂÂ NUMERO DA SORTE COPA TGJOGO\n\n` +
+  `Ã°ÂÂÂÃ¯Â¸Â Seu numero: ${numero}\n` +
+  `Ã°ÂÂÂ ID do jogador: ${reserva.player_id}\n` +
+  `Ã°ÂÂÂ¤ Nome: ${reserva.nome_real}\n` +
+  `Ã¢ÂÂ Status: registrado\n\n` +
   `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
 );
 });
 
 // --------------------------------------------------------------------
-// /meu_numero â jogador consulta seu numero pelo bot
+// /meu_numero Ã¢ÂÂ jogador consulta seu numero pelo bot
 // --------------------------------------------------------------------
 bot.onText(/\/meu_numero/, async (msg) => {
 const chatId = msg.chat.id;
@@ -185,17 +185,17 @@ if (reserva) {
   const numero = String(reserva.numero).padStart(2, "0");
   bot.sendMessage(
     chatId,
-    "ð¯ Seu nÃºmero da sorte Ã© o *" + numero + "*!\n\n" +
-    "ð¤ Nome: " + reserva.nome_real + "\n" +
-    "ð ID: " + reserva.player_id + "\n\n" +
-    "Boa sorte na Copa TGJOGO! â½",
+    "Ã°ÂÂÂ¯ Seu nÃÂºmero da sorte ÃÂ© o *" + numero + "*!\n\n" +
+    "Ã°ÂÂÂ¤ Nome: " + reserva.nome_real + "\n" +
+    "Ã°ÂÂÂ ID: " + reserva.player_id + "\n\n" +
+    "Boa sorte na Copa TGJOGO! Ã¢ÂÂ½",
     { parse_mode: "Markdown" }
   );
 } else {
   bot.sendMessage(
     chatId,
-    "â VocÃª ainda nÃ£o tem um nÃºmero registrado.\n\n" +
-    "Acesse o site e escolha o seu! ðï¸"
+    "Ã¢ÂÂ VocÃÂª ainda nÃÂ£o tem um nÃÂºmero registrado.\n\n" +
+    "Acesse o site e escolha o seu! Ã°ÂÂÂÃ¯Â¸Â"
   );
 }
 });
@@ -203,9 +203,9 @@ if (reserva) {
 function avisarGradeCheia() {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `ð GRADE COMPLETA! - COPA TGJOGO\n\n` +
-  `Todos os ${TOTAL} nÃºmeros foram preenchidos!\n\n` +
-  `O sorteio pode ser realizado agora. ð`
+  `Ã°ÂÂÂ GRADE COMPLETA! - COPA TGJOGO\n\n` +
+  `Todos os ${TOTAL} nÃÂºmeros foram preenchidos!\n\n` +
+  `O sorteio pode ser realizado agora. Ã°ÂÂÂ`
 ).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
@@ -216,7 +216,7 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `ðï¸ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
+  `Ã°ÂÂÂÃ¯Â¸Â NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
   `Numero escolhido: ${numero}\n` +
   `ID do jogador: ${reserva.player_id}\n` +
   `Nome real: ${reserva.nome_real}\n` +
@@ -288,7 +288,7 @@ res.sendStatus(200);
 });
 
 // --------------------------------------------------------------------
-// KEEP-ALIVE â usado por UptimeRobot ou similar para evitar cold start
+// KEEP-ALIVE Ã¢ÂÂ usado por UptimeRobot ou similar para evitar cold start
 // Configure o monitor para pingar GET /ping a cada 5 minutos
 // --------------------------------------------------------------------
 app.get("/ping", (req, res) => {
@@ -598,7 +598,7 @@ res.send(`<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin Â· Copa TGJOGO</title>
+<title>Admin ÃÂ· Copa TGJOGO</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -652,45 +652,45 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>ð Painel Admin Â· Copa TGJOGO</h1>
+<h1>Ã°ÂÂÂ Painel Admin ÃÂ· Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
-<div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
-<div class="stat"><div class="n" id="sPct">â</div><div class="l">% Bot confirmado</div></div>
+<div class="stat"><div class="n" id="sTotal">Ã¢ÂÂ</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">Ã¢ÂÂ</div><div class="l">DisponÃÂ­veis</div></div>
+<div class="stat"><div class="n" id="sBot">Ã¢ÂÂ</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sPct">Ã¢ÂÂ</div><div class="l">% Bot confirmado</div></div>
 </div>
 
 <div class="btns">
-<a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
+<a class="btn" href="/api/admin/exportar">Ã¢Â¬ÂÃ¯Â¸Â Exportar CSV</a>
 <button class="btn-sortear" onclick="sortear()">&#x1F3AF; Sortear Ganhador</button>
-<button class="btn-reset" onclick="resetarGrade()">ðï¸ Resetar Grade</button>
+<button class="btn-reset" onclick="resetarGrade()">Ã°ÂÂÂÃ¯Â¸Â Resetar Grade</button>
 </div>
 
 <div class="chart-box">
-<h2>ð InscriÃ§Ãµes por hora</h2>
+<h2>Ã°ÂÂÂ InscriÃÂ§ÃÂµes por hora</h2>
 <canvas id="chartHoras"></canvas>
 </div>
 
-<div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">Ã°ÂÂÂ Atualiza automaticamente a cada 30 segundos</div>
 <div class="filters">
 <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
-<button class="filter-btn" onclick="setFiltro('confirmado',this)">â Confirmado no Bot</button>
-<button class="filter-btn" onclick="setFiltro('pendente',this)">â³ Pendente</button>
+<button class="filter-btn" onclick="setFiltro('confirmado',this)">Ã¢ÂÂ Confirmado no Bot</button>
+<button class="filter-btn" onclick="setFiltro('pendente',this)">Ã¢ÂÂ³ Pendente</button>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()" style="margin-left:auto"/>
 </div>
 
 <table>
 <thead>
 <tr>
-<th>NÂº</th>
+<th>NÃÂº</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>AÃ§Ãµes</th>
+<th>AÃÂ§ÃÂµes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -700,11 +700,11 @@ input[type=text]::placeholder{color:#9fc4b3}
 <!-- Modal sorteio -->
 <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
 <div class="modal">
-<h2>ð² NÃºmero Sorteado (Preview)</h2>
-<div class="num-grande" id="mNumero">â</div>
-<div class="nome-sort" id="mNome">â</div>
-<div class="id-sort" id="mId">â</div>
-<div class="aviso">â ï¸ Este Ã© apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
+<h2>Ã°ÂÂÂ² NÃÂºmero Sorteado (Preview)</h2>
+<div class="num-grande" id="mNumero">Ã¢ÂÂ</div>
+<div class="nome-sort" id="mNome">Ã¢ÂÂ</div>
+<div class="id-sort" id="mId">Ã¢ÂÂ</div>
+<div class="aviso">Ã¢ÂÂ Ã¯Â¸Â Este ÃÂ© apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
 <button class="btn-fechar" onclick="document.getElementById('modalOverlay').classList.remove('show')">Fechar</button>
 </div>
 </div>
@@ -724,7 +724,7 @@ document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = confirmados;
 document.getElementById('sPct').textContent = d.total > 0 ? Math.round(confirmados/d.total*100) + '%' : '\u2014';
-document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
+document.getElementById('atualizado').textContent = 'ÃÂltima atualizaÃÂ§ÃÂ£o: ' + new Date().toLocaleTimeString('pt-BR');
 filtrar();
 renderChart();
 } catch(e) {
@@ -783,7 +783,7 @@ type: 'bar',
 data: {
 labels,
 datasets: [{
-label: 'InscriÃ§Ãµes',
+label: 'InscriÃÂ§ÃÂµes',
 data,
 backgroundColor: 'rgba(255,216,77,.7)',
 borderColor: '#ffd84d',
@@ -804,7 +804,7 @@ y: { ticks: { color: '#9fc4b3', stepSize: 1 }, grid: { color: 'rgba(255,255,255,
 
 async function sortear() {
 if (!todos.length) { alert('Nenhum participante inscrito.'); return; }
-if (!confirm('Sortear o ganhador OFICIAL agora?\nEsta acao nao pode ser desfeita.')) return;
+if (!confirm('Sortear o ganhador OFICIAL agora?\\nEsta acao nao pode ser desfeita.')) return;
 try {
 const r = await fetch('/api/admin/sortear', { method: 'POST', credentials: 'include' });
 const d = await r.json();
@@ -820,24 +820,24 @@ document.getElementById('modalOverlay').classList.remove('show');
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o nÃºmero ' + n + '?\\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o nÃÂºmero ' + n + '?\\nEsta aÃÂ§ÃÂ£o remove o participante e libera o slot.')) return;
 try {
 const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
-if (d.ok) { alert('\u2705 NÃºmero ' + n + ' liberado!'); carregar(); }
+if (d.ok) { alert('\u2705 NÃÂºmero ' + n + ' liberado!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
+} catch(e) { alert('Erro de conexÃÂ£o.'); }
 }
 
 async function resetarGrade() {
-if (!confirm('\u26a0\ufe0f ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\\n\\nTem certeza?')) return;
-if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
+if (!confirm('\u26a0\ufe0f ATENÃÂÃÂO: Isso vai apagar TODOS os participantes e liberar todos os nÃÂºmeros.\\n\\nTem certeza?')) return;
+if (!confirm('Segunda confirmaÃÂ§ÃÂ£o: realmente resetar toda a grade?')) return;
 try {
 const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
 const d = await r.json();
-if (d.ok) { alert('\u2705 Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
+if (d.ok) { alert('\u2705 Grade resetada! Todos os nÃÂºmeros estÃÂ£o disponÃÂ­veis.'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
+} catch(e) { alert('Erro de conexÃÂ£o.'); }
 }
 
 carregar();
@@ -850,6 +850,6 @@ setInterval(carregar, 30000);
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃÂ­vel em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 })
