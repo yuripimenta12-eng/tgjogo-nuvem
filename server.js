@@ -640,7 +640,7 @@ document.getElementById('modalOverlay').classList.remove('show');
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o número ' + n + '?\nEsta ação remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
 try {
 const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
@@ -650,7 +650,7 @@ else alert('Erro: ' + d.erro);
 }
 
 async function resetarGrade() {
-if (!confirm('\u26a0\ufe0f ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\n\nTem certeza?')) return;
+if (!confirm('\u26a0\ufe0f ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\\n\\nTem certeza?')) return;
 if (!confirm('Segunda confirmação: realmente resetar toda a grade?')) return;
 try {
 const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
