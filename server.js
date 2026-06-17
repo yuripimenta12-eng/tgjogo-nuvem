@@ -47,7 +47,7 @@ return s
 }
 
 // --------------------------------------------------------------------
-// ARMAZENAMENTO â Upstash Redis (permanente) ou arquivo JSON (local)
+// ARMAZENAMENTO — Upstash Redis (permanente) ou arquivo JSON (local)
 // --------------------------------------------------------------------
 const DB_FILE = "campanha.json";
 const REDIS_KEY = "tgjogo:reservas";
@@ -105,9 +105,9 @@ fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 
 let reservas = await carregarReservas();
 if (usandoRedis) {
-console.log("[Storage] Usando Upstash Redis â dados persistentes.");
+console.log("[Storage] Usando Upstash Redis — dados persistentes.");
 } else {
-console.warn("[Storage] Upstash nao configurado â usando arquivo local.");
+console.warn("[Storage] Upstash nao configurado — usando arquivo local.");
 }
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
@@ -124,7 +124,7 @@ function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.leng
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
+// BOT DO TELEGRAM (modo webhook — sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
 const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
 const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
@@ -161,18 +161,18 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada! ð\n\n` +
-  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
-  `ðï¸ Seu numero: ${numero}\n` +
-  `ð ID do jogador: ${reserva.player_id}\n` +
-  `ð¤ Nome: ${reserva.nome_real}\n` +
-  `â Status: registrado\n\n` +
+  `Participacao confirmada! 🍀\n\n` +
+  `🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
+  `🎟️ Seu numero: ${numero}\n` +
+  `🆔 ID do jogador: ${reserva.player_id}\n` +
+  `👤 Nome: ${reserva.nome_real}\n` +
+  `✅ Status: registrado\n\n` +
   `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
 );
 });
 
 // --------------------------------------------------------------------
-// /meu_numero â jogador consulta seu numero pelo bot
+// /meu_numero — jogador consulta seu numero pelo bot
 // --------------------------------------------------------------------
 bot.onText(/\/meu_numero/, async (msg) => {
 const chatId = msg.chat.id;
@@ -185,17 +185,17 @@ if (reserva) {
   const numero = String(reserva.numero).padStart(2, "0");
   bot.sendMessage(
     chatId,
-    "ð¯ Seu nÃºmero da sorte Ã© o *" + numero + "*!\n\n" +
-    "ð¤ Nome: " + reserva.nome_real + "\n" +
-    "ð ID: " + reserva.player_id + "\n\n" +
-    "Boa sorte na Copa TGJOGO! â½",
+    "🎯 Seu número da sorte é o *" + numero + "*!\n\n" +
+    "👤 Nome: " + reserva.nome_real + "\n" +
+    "🆔 ID: " + reserva.player_id + "\n\n" +
+    "Boa sorte na Copa TGJOGO! ⚽",
     { parse_mode: "Markdown" }
   );
 } else {
   bot.sendMessage(
     chatId,
-    "â VocÃª ainda nÃ£o tem um nÃºmero registrado.\n\n" +
-    "Acesse o site e escolha o seu! ðï¸"
+    "❌ Você ainda não tem um número registrado.\n\n" +
+    "Acesse o site e escolha o seu! 🎟️"
   );
 }
 });
@@ -203,9 +203,9 @@ if (reserva) {
 function avisarGradeCheia() {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `ð GRADE COMPLETA! - COPA TGJOGO\n\n` +
-  `Todos os ${TOTAL} nÃºmeros foram preenchidos!\n\n` +
-  `O sorteio pode ser realizado agora. ð`
+  `🎉 GRADE COMPLETA! - COPA TGJOGO\n\n` +
+  `Todos os ${TOTAL} números foram preenchidos!\n\n` +
+  `O sorteio pode ser realizado agora. 🏆`
 ).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
@@ -216,7 +216,7 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `ðï¸ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
+  `🎟️ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
   `Numero escolhido: ${numero}\n` +
   `ID do jogador: ${reserva.player_id}\n` +
   `Nome real: ${reserva.nome_real}\n` +
@@ -288,7 +288,7 @@ res.sendStatus(200);
 });
 
 // --------------------------------------------------------------------
-// KEEP-ALIVE â usado por UptimeRobot ou similar para evitar cold start
+// KEEP-ALIVE — usado por UptimeRobot ou similar para evitar cold start
 // Configure o monitor para pingar GET /ping a cada 5 minutos
 // --------------------------------------------------------------------
 app.get("/ping", (req, res) => {
@@ -420,7 +420,7 @@ res.send(`<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin Â· Copa TGJOGO</title>
+<title>Admin · Copa TGJOGO</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -474,45 +474,45 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>ð Painel Admin Â· Copa TGJOGO</h1>
+<h1>🏆 Painel Admin · Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
-<div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
-<div class="stat"><div class="n" id="sPct">â</div><div class="l">% Bot confirmado</div></div>
+<div class="stat"><div class="n" id="sTotal">—</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">—</div><div class="l">Disponíveis</div></div>
+<div class="stat"><div class="n" id="sBot">—</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sPct">—</div><div class="l">% Bot confirmado</div></div>
 </div>
 
 <div class="btns">
-<a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
-<button class="btn-sortear" onclick="sortearPreview()">ð² Sortear (Preview)</button>
-<button class="btn-reset" onclick="resetarGrade()">ðï¸ Resetar Grade</button>
+<a class="btn" href="/api/admin/exportar">⬇️ Exportar CSV</a>
+<button class="btn-sortear" onclick="sortearPreview()">🎲 Sortear (Preview)</button>
+<button class="btn-reset" onclick="resetarGrade()">🗑️ Resetar Grade</button>
 </div>
 
 <div class="chart-box">
-<h2>ð InscriÃ§Ãµes por hora</h2>
+<h2>📈 Inscrições por hora</h2>
 <canvas id="chartHoras"></canvas>
 </div>
 
-<div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">🔄 Atualiza automaticamente a cada 30 segundos</div>
 <div class="filters">
 <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
-<button class="filter-btn" onclick="setFiltro('confirmado',this)">â Confirmado no Bot</button>
-<button class="filter-btn" onclick="setFiltro('pendente',this)">â³ Pendente</button>
+<button class="filter-btn" onclick="setFiltro('confirmado',this)">✅ Confirmado no Bot</button>
+<button class="filter-btn" onclick="setFiltro('pendente',this)">⏳ Pendente</button>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()" style="margin-left:auto"/>
 </div>
 
 <table>
 <thead>
 <tr>
-<th>NÂº</th>
+<th>Nº</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>AÃ§Ãµes</th>
+<th>Ações</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -522,11 +522,11 @@ input[type=text]::placeholder{color:#9fc4b3}
 <!-- Modal sorteio -->
 <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
 <div class="modal">
-<h2>ð² NÃºmero Sorteado (Preview)</h2>
-<div class="num-grande" id="mNumero">â</div>
-<div class="nome-sort" id="mNome">â</div>
-<div class="id-sort" id="mId">â</div>
-<div class="aviso">â ï¸ Este Ã© apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
+<h2>🎲 Número Sorteado (Preview)</h2>
+<div class="num-grande" id="mNumero">—</div>
+<div class="nome-sort" id="mNome">—</div>
+<div class="id-sort" id="mId">—</div>
+<div class="aviso">⚠️ Este é apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
 <button class="btn-fechar" onclick="document.getElementById('modalOverlay').classList.remove('show')">Fechar</button>
 </div>
 </div>
@@ -546,7 +546,7 @@ document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = confirmados;
 document.getElementById('sPct').textContent = d.total > 0 ? Math.round(confirmados/d.total*100) + '%' : '\u2014';
-document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
+document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
 filtrar();
 renderChart();
 } catch(e) {
@@ -605,7 +605,7 @@ type: 'bar',
 data: {
 labels,
 datasets: [{
-label: 'InscriÃ§Ãµes',
+label: 'Inscrições',
 data,
 backgroundColor: 'rgba(255,216,77,.7)',
 borderColor: '#ffd84d',
@@ -629,7 +629,7 @@ if (!todos.length) { alert('Nenhum participante inscrito.'); return; }
 const sorteado = todos[Math.floor(Math.random() * todos.length)];
 document.getElementById('mNumero').textContent = sorteado.numero;
 document.getElementById('mNome').textContent = sorteado.nome_real;
-document.getElementById('mId').textContent = sorteado.player_id + ' Â· ' + sorteado.telegram_nome;
+document.getElementById('mId').textContent = sorteado.player_id + ' · ' + sorteado.telegram_nome;
 document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -640,24 +640,24 @@ document.getElementById('modalOverlay').classList.remove('show');
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o nÃºmero ' + n + '?\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o número ' + n + '?\nEsta ação remove o participante e libera o slot.')) return;
 try {
 const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
-if (d.ok) { alert('\u2705 NÃºmero ' + n + ' liberado!'); carregar(); }
+if (d.ok) { alert('\u2705 Número ' + n + ' liberado!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
+} catch(e) { alert('Erro de conexão.'); }
 }
 
 async function resetarGrade() {
-if (!confirm('\u26a0\ufe0f ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\n\nTem certeza?')) return;
-if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
+if (!confirm('\u26a0\ufe0f ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\n\nTem certeza?')) return;
+if (!confirm('Segunda confirmação: realmente resetar toda a grade?')) return;
 try {
 const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
 const d = await r.json();
-if (d.ok) { alert('\u2705 Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
+if (d.ok) { alert('\u2705 Grade resetada! Todos os números estão disponíveis.'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
+} catch(e) { alert('Erro de conexão.'); }
 }
 
 carregar();
@@ -670,6 +670,6 @@ setInterval(carregar, 30000);
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 })
