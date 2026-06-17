@@ -234,7 +234,13 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cors({ origin: ALLOWED_ORIGIN }));
-app.use(express.static(path.join(__dirname, "site")));
+app.use(express.static(path.join(__dirname, "site"), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".html")) {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+    }
+  }
+}));
 
 app.use(rateLimit({
 windowMs: 60 * 1000,
@@ -571,13 +577,13 @@ tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontr
 return;
 }
 tbody.innerHTML = lista.map(p => \`<tr>
-<td class="num">${p.numero}</td>
-<td>${p.player_id}</td>
-<td>${p.nome_real}</td>
-<td>${p.telegram_nome}</td>
-<td class="${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">${p.telegram_chat}</td>
-<td>${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(${parseInt(p.numero)})">\ud83d\uddd1\ufe0f Liberar</button></td>
+<td class="num">\${p.numero}</td>
+<td>\${p.player_id}</td>
+<td>\${p.nome_real}</td>
+<td>\${p.telegram_nome}</td>
+<td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
+<td>\${p.criado_em}</td>
+<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">\ud83d\uddd1\ufe0f Liberar</button></td>
 </tr>\`).join('');
 }
 
