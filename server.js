@@ -438,7 +438,28 @@ app.post("/api/admin/sortear", checkAdmin, function(req, res) {
   var sorteioId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
   sorteiosAtivos[sorteioId] = Object.assign({}, vencedor, { sorteadoEm: new Date().toISOString() });
   console.log("[Sorteio] " + sorteioId + " - " + vencedor.nome_real + " #" + vencedor.numero);
-  res.json({ ok: true, sorteioId: sorteioId, redirectUrl: "/sorteio-ao-vivo?id_sorteio=" + sorteioId });
+
+  // Notificar ganhador no Telegram (apenas se tiver confirmado no bot)
+  var notificado = false;
+  if (vencedor.telegram_chat) {
+    var numStr = String(vencedor.numero).padStart(3, '0');
+    var msgGanhador =
+      '🏆 PARABÉNS, ' + vencedor.nome_real + '!\n\n' +
+      'Você foi SORTEADO na Copa TGJOGO!\n\n' +
+      '🎯 Número da sorte: ' + numStr + '\n' +
+      '🎮 ID TGJOGO: ' + vencedor.player_id + '\n\n' +
+      '📣 A equipe TGJOGO entrará em contato em breve sobre o prêmio.\n\n' +
+      'Parabéns e obrigado por participar! ⚽️';
+    bot.sendMessage(vencedor.telegram_chat, msgGanhador).then(function() {
+      console.log('[Sorteio] Notificação enviada ao ganhador chat_id=' + vencedor.telegram_chat);
+    }).catch(function(e) {
+      console.error('[Sorteio] Erro ao notificar ganhador:', e.message);
+    });
+    notificado = true;
+  } else {
+    console.warn('[Sorteio] Ganhador sem telegram confirmado - notificação não enviada.');
+  }
+    res.json({ ok: true, sorteioId: sorteioId, redirectUrl: "/sorteio-ao-vivo?id_sorteio=" + sorteioId, notificado: notificado });
 });
 
 app.get("/api/sorteio/:id", function(req, res) {
