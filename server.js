@@ -29,7 +29,7 @@ UPSTASH_REDIS_REST_TOKEN,
 
 const TOTAL = Number(GRID_SIZE);
 
-if (!TELEGRAM_BOT_TOKEN || TELEGTAM_BOT_TOKEN.includes("cole_o_token")) {
+if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("cole_o_token")) {
 console.error("\n[ERRO] Falta o TELEGRAM_BOT_TOKEN no arquivo .env\n");
 process.exit(1);
 }
