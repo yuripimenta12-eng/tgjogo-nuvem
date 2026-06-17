@@ -126,10 +126,10 @@ function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.
 // --------------------------------------------------------------------
 // BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
-const WEBHOOK_PATH = `/tg/${TELEEGTAM_BOT_TOKEN}`;
+const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
 const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
 
-const bot = new TelegramBot(TELEGTAM_BOT_TOKEN, { polling: false });
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
 try {
 await bot.setWebHook(WEBHOOK_URL, { drop_pending_updates: true });
@@ -161,8 +161,8 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada!!ð\n\n` +
-  `ð NUMERODA SORTE COPA TGJOGO\n\n` +
+  `Participacao confirmada! ð\n\n` +
+  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
   `ðï¸ Seu numero: ${numero}\n` +
   `ð ID do jogador: ${reserva.player_id}\n` +
   `ð¤ Nome: ${reserva.nome_real}\n` +
@@ -570,7 +570,7 @@ if (!lista.length) {
 tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontrado.</td></tr>';
 return;
 }
-tbody.innerHTML = lista.map(p => `<tr>
+tbody.innerHTML = lista.map(p => \`<tr>
 <td class="num">${p.numero}</td>
 <td>${p.player_id}</td>
 <td>${p.nome_real}</td>
@@ -578,7 +578,7 @@ tbody.innerHTML = lista.map(p => `<tr>
 <td class="${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">${p.telegram_chat}</td>
 <td>${p.criado_em}</td>
 <td><button class="btn-lib" onclick="liberar(${parseInt(p.numero)})">\ud83d\uddd1\ufe0f Liberar</button></td>
-</tr>`).join('');
+</tr>\`).join('');
 }
 
 function renderChart() {
@@ -666,4 +666,4 @@ console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
 if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
-});
+})
