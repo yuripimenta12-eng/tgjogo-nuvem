@@ -29,7 +29,7 @@ UPSTASH_REDIS_REST_TOKEN,
 
 const TOTAL = Number(GRID_SIZE);
 
-if (!TELEGRAM_BOT_TOKEN || TELEGXAM_BOT_TOKEN.includes("cole_o_token")) {
+if (!TELEGRAM_BOT_TOKEN || TELEGTAM_BOT_TOKEN.includes("cole_o_token")) {
 console.error("\n[ERRO] Falta o TELEGRAM_BOT_TOKEN no arquivo .env\n");
 process.exit(1);
 }
@@ -126,10 +126,10 @@ function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.
 // --------------------------------------------------------------------
 // BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
-const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
+const WEBHOOK_PATH = `/tg/${TELEEGTAM_BOT_TOKEN}`;
 const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
 
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
+const bot = new TelegramBot(TELEGTAM_BOT_TOKEN, { polling: false });
 
 try {
 await bot.setWebHook(WEBHOOK_URL, { drop_pending_updates: true });
@@ -161,8 +161,8 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada! ð\n\n` +
-  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
+  `Participacao confirmada!!ð\n\n` +
+  `ð NUMERODA SORTE COPA TGJOGO\n\n` +
   `ðï¸ Seu numero: ${numero}\n` +
   `ð ID do jogador: ${reserva.player_id}\n` +
   `ð¤ Nome: ${reserva.nome_real}\n` +
@@ -506,7 +506,7 @@ input[type=text]::placeholder{color:#9fc4b3}
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>AcÃ§Ãµes</th>
+<th>AÃ§Ãµes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -517,4 +517,153 @@ input[type=text]::placeholder{color:#9fc4b3}
 <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
 <div class="modal">
 <h2>ð² NÃºmero Sorteado (Preview)</h2>
-<div class="num-grande" id="mNumero">â
+<div class="num-grande" id="mNumero">â</div>
+<div class="nome-sort" id="mNome">â</div>
+<div class="id-sort" id="mId">â</div>
+<div class="aviso">â ï¸ Este Ã© apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
+<button class="btn-fechar" onclick="document.getElementById('modalOverlay').classList.remove('show')">Fechar</button>
+</div>
+</div>
+
+<script>
+let todos = [];
+let filtroAtivo = 'todos';
+let grafico = null;
+
+async function carregar() {
+try {
+const r = await fetch('/api/admin/participantes', { credentials: 'include' });
+const d = await r.json();
+todos = d.participantes || [];
+const confirmados = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
+document.getElementById('sTotal').textContent = d.total;
+document.getElementById('sDisp').textContent = d.disponiveis;
+document.getElementById('sBot').textContent = confirmados;
+document.getElementById('sPct').textContent = d.total > 0 ? Math.round(confirmados/d.total*100) + '%' : '\u2014';
+document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
+filtrar();
+renderChart();
+} catch(e) {
+document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
+}
+}
+
+function setFiltro(f, btn) {
+filtroAtivo = f;
+document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+filtrar();
+}
+
+function filtrar() {
+const q = document.getElementById('busca').value.toLowerCase();
+let lista = todos;
+if (filtroAtivo === 'confirmado') lista = lista.filter(p => p.telegram_chat === 'Confirmado no bot');
+if (filtroAtivo === 'pendente') lista = lista.filter(p => p.telegram_chat !== 'Confirmado no bot');
+if (q) lista = lista.filter(p =>
+p.nome_real.toLowerCase().includes(q) ||
+p.player_id.toLowerCase().includes(q) ||
+p.telegram_nome.toLowerCase().includes(q)
+);
+const tbody = document.getElementById('tbody');
+if (!lista.length) {
+tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontrado.</td></tr>';
+return;
+}
+tbody.innerHTML = lista.map(p => `<tr>
+<td class="num">${p.numero}</td>
+<td>${p.player_id}</td>
+<td>${p.nome_real}</td>
+<td>${p.telegram_nome}</td>
+<td class="${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">${p.telegram_chat}</td>
+<td>${p.criado_em}</td>
+<td><button class="btn-lib" onclick="liberar(${parseInt(p.numero)})">\ud83d\uddd1\ufe0f Liberar</button></td>
+</tr>`).join('');
+}
+
+function renderChart() {
+const contagem = {};
+todos.forEach(p => {
+const iso = p.criado_em_iso;
+if (!iso) return;
+const d = new Date(iso);
+const chave = d.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).replace(',', '');
+contagem[chave] = (contagem[chave] || 0) + 1;
+});
+const labels = Object.keys(contagem).sort();
+const data = labels.map(l => contagem[l]);
+if (grafico) grafico.destroy();
+const ctx = document.getElementById('chartHoras').getContext('2d');
+grafico = new Chart(ctx, {
+type: 'bar',
+data: {
+labels,
+datasets: [{
+label: 'InscriÃ§Ãµes',
+data,
+backgroundColor: 'rgba(255,216,77,.7)',
+borderColor: '#ffd84d',
+borderWidth: 1,
+borderRadius: 4,
+}]
+},
+options: {
+responsive: true,
+plugins: { legend: { display: false } },
+scales: {
+x: { ticks: { color: '#9fc4b3', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.06)' } },
+y: { ticks: { color: '#9fc4b3', stepSize: 1 }, grid: { color: 'rgba(255,255,255,.08)' }, beginAtZero: true }
+}
+}
+});
+}
+
+function sortearPreview() {
+if (!todos.length) { alert('Nenhum participante inscrito.'); return; }
+const sorteado = todos[Math.floor(Math.random() * todos.length)];
+document.getElementById('mNumero').textContent = sorteado.numero;
+document.getElementById('mNome').textContent = sorteado.nome_real;
+document.getElementById('mId').textContent = sorteado.player_id + ' Â· ' + sorteado.telegram_nome;
+document.getElementById('modalOverlay').classList.add('show');
+}
+
+function fecharModal(e) {
+if (e.target === document.getElementById('modalOverlay'))
+document.getElementById('modalOverlay').classList.remove('show');
+}
+
+async function liberar(numero) {
+const n = String(numero).padStart(2, '0');
+if (!confirm('Liberar o nÃºmero ' + n + '?\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
+try {
+const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
+const d = await r.json();
+if (d.ok) { alert('\u2705 NÃºmero ' + n + ' liberado!'); carregar(); }
+else alert('Erro: ' + d.erro);
+} catch(e) { alert('Erro de conexÃ£o.'); }
+}
+
+async function resetarGrade() {
+if (!confirm('\u26a0\ufe0f ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\n\nTem certeza?')) return;
+if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
+try {
+const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
+const d = await r.json();
+if (d.ok) { alert('\u2705 Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
+else alert('Erro: ' + d.erro);
+} catch(e) { alert('Erro de conexÃ£o.'); }
+}
+
+carregar();
+setInterval(carregar, 30000);
+</script>
+</body>
+</html>`);
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+console.log(`Servidor no ar na porta ${PORT}.`);
+console.log(`Grade configurada de 1 a ${TOTAL}.`);
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
+else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
+});
