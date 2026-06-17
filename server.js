@@ -29,7 +29,7 @@ UPSTASH_REDIS_REST_TOKEN,
 
 const TOTAL = Number(GRID_SIZE);
 
-if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("cole_o_token")) {
+if (!TELEGRAM_BOT_TOKEN || TELEGXAM_BOT_TOKEN.includes("cole_o_token")) {
 console.error("\n[ERRO] Falta o TELEGRAM_BOT_TOKEN no arquivo .env\n");
 process.exit(1);
 }
@@ -357,6 +357,7 @@ const lista = reservas.map((r) => ({
   telegram_nome: r.telegram_nome,
   telegram_chat: r.telegram_chat ? "Confirmado no bot" : "Pendente",
   criado_em: new Date(r.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+  criado_em_iso: r.criado_em,
 }));
 res.json({ ok: true, total: lista.length, disponiveis: TOTAL - lista.length, participantes: lista });
 });
@@ -414,6 +415,7 @@ res.send(`<!DOCTYPE html>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Admin Â· Copa TGJOGO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",system-ui,sans-serif;background:#0b3d2e;color:#f0faf5;min-height:100vh;padding:24px 16px}
@@ -424,12 +426,21 @@ h1{color:#ffd84d;font-size:22px;margin-bottom:4px}
 .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:130px}
 .stat .n{font-size:32px;font-weight:900;color:#ffd84d}
 .stat .l{font-size:12px;color:#9fc4b3;margin-top:2px}
-.btn{background:linear-gradient(180deg,#ffd84d,#f5a623);color:#0a2a20;font-weight:800;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block;margin-bottom:18px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.btn{background:linear-gradient(180deg,#ffd84d,#f5a623);color:#0a2a20;font-weight:800;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;text-decoration:none;display:inline-block}
 .btn:hover{filter:brightness(1.1)}
+.btn-sortear{background:linear-gradient(180deg,#a855f7,#7c3aed);color:#fff;font-weight:800;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer}
+.btn-sortear:hover{filter:brightness(1.15)}
 .btn-lib{background:rgba(255,80,60,.12);border:1px solid rgba(255,80,60,.35);color:#ff7070;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600}
 .btn-lib:hover{background:rgba(255,80,60,.28)}
-.btn-reset{background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.4);color:#ff5555;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;font-weight:800;margin-left:10px}
+.btn-reset{background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.4);color:#ff5555;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;font-weight:800}
 .btn-reset:hover{background:rgba(255,50,50,.3)}
+.chart-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;margin-bottom:20px}
+.chart-box h2{font-size:13px;color:#9fc4b3;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.chart-box canvas{max-height:180px}
+.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#9fc4b3;border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;font-weight:600;transition:.15s}
+.filter-btn.active{background:rgba(255,216,77,.15);border-color:#ffd84d;color:#ffd84d}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:rgba(255,255,255,.1);padding:10px 12px;text-align:left;color:#ffd84d;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
@@ -439,8 +450,20 @@ tr:hover td{background:rgba(255,255,255,.04)}
 .pend{color:#9fc4b3}
 .empty{text-align:center;padding:40px;color:#9fc4b3}
 .refresh{font-size:12px;color:#9fc4b3;margin-bottom:12px}
-input[type=text]{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;width:260px;margin-bottom:14px}
+input[type=text]{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;width:260px}
 input[type=text]::placeholder{color:#9fc4b3}
+/* Sorteio modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#0f4a35;border:2px solid #ffd84d;border-radius:20px;padding:36px 40px;text-align:center;max-width:400px;width:90%;animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h2{color:#ffd84d;font-size:18px;margin-bottom:6px}
+.modal .num-grande{font-size:72px;font-weight:900;color:#ffd84d;line-height:1;margin:16px 0 8px}
+.modal .nome-sort{font-size:16px;color:#f0faf5;margin-bottom:4px;font-weight:700}
+.modal .id-sort{font-size:13px;color:#9fc4b3;margin-bottom:20px}
+.modal .aviso{font-size:11px;color:#9fc4b3;margin-bottom:20px;line-height:1.5}
+.btn-fechar{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:10px 24px;font-size:14px;cursor:pointer}
+.btn-fechar:hover{background:rgba(255,255,255,.18)}
 </style>
 </head>
 <body>
@@ -452,13 +475,27 @@ input[type=text]::placeholder{color:#9fc4b3}
 <div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
 <div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
 <div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sPct">â</div><div class="l">% Bot confirmado</div></div>
 </div>
 
+<div class="btns">
 <a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
+<button class="btn-sortear" onclick="sortearPreview()">ð² Sortear (Preview)</button>
 <button class="btn-reset" onclick="resetarGrade()">ðï¸ Resetar Grade</button>
+</div>
+
+<div class="chart-box">
+<h2>ð InscriÃ§Ãµes por hora</h2>
+<canvas id="chartHoras"></canvas>
+</div>
 
 <div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
-<input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()"/>
+<div class="filters">
+<button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
+<button class="filter-btn" onclick="setFiltro('confirmado',this)">â Confirmado no Bot</button>
+<button class="filter-btn" onclick="setFiltro('pendente',this)">â³ Pendente</button>
+<input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()" style="margin-left:auto"/>
+</div>
 
 <table>
 <thead>
@@ -469,85 +506,15 @@ input[type=text]::placeholder{color:#9fc4b3}
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>AÃ§Ãµes</th>
+<th>AcÃ§Ãµes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
-<script>
-let todos = [];
 
-async function carregar() {
-try {
-const r = await fetch('/api/admin/participantes', { credentials: 'include' });
-const d = await r.json();
-todos = d.participantes || [];
-document.getElementById('sTotal').textContent = d.total;
-document.getElementById('sDisp').textContent = d.disponiveis;
-document.getElementById('sBot').textContent = todos.filter(p => p.telegram_chat === 'Confirmado no bot').length;
-document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
-filtrar();
-} catch(e) {
-document.getElementById('atualizado').textContent = 'Erro ao carregar dados.';
-}
-}
-
-function filtrar() {
-const q = document.getElementById('busca').value.toLowerCase();
-const lista = q ? todos.filter(p =>
-p.nome_real.toLowerCase().includes(q) ||
-p.player_id.toLowerCase().includes(q) ||
-p.telegram_nome.toLowerCase().includes(q)
-) : todos;
-const tbody = document.getElementById('tbody');
-if (!lista.length) {
-tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum participante encontrado.</td></tr>';
-return;
-}
-tbody.innerHTML = lista.map(p => \`<tr>
-<td class="num">\${p.numero}</td>
-<td>\${p.player_id}</td>
-<td>\${p.nome_real}</td>
-<td>\${p.telegram_nome}</td>
-<td class="\${p.telegram_chat === 'Confirmado no bot' ? 'ok' : 'pend'}">\${p.telegram_chat}</td>
-<td>\${p.criado_em}</td>
-<td><button class="btn-lib" onclick="liberar(\${parseInt(p.numero)})">ðï¸ Liberar</button></td>
-</tr>\`).join('');
-}
-
-async function liberar(numero) {
-const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o nÃºmero ' + n + '?\\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
-try {
-const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
-const d = await r.json();
-if (d.ok) { alert('â NÃºmero ' + n + ' liberado!'); carregar(); }
-else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
-}
-
-async function resetarGrade() {
-if (!confirm('â ï¸ ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\\n\\nTem certeza?')) return;
-if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
-try {
-const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
-const d = await r.json();
-if (d.ok) { alert('â Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
-else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexÃ£o.'); }
-}
-
-carregar();
-setInterval(carregar, 30000);
-</script>
-</body>
-</html>`);
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-console.log(`Servidor no ar na porta ${PORT}.`);
-console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
-else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
-});
+<!-- Modal sorteio -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
+<div class="modal">
+<h2>ð² NÃºmero Sorteado (Preview)</h2>
+<div class="num-grande" id="mNumero">â
