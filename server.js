@@ -47,7 +47,7 @@ return s
 }
 
 // --------------------------------------------------------------------
-// ARMAZENAMENTO — Upstash Redis (permanente) ou arquivo JSON (local)
+// ARMAZENAMENTO â Upstash Redis (permanente) ou arquivo JSON (local)
 // --------------------------------------------------------------------
 const DB_FILE = "campanha.json";
 const REDIS_KEY = "tgjogo:reservas";
@@ -105,9 +105,9 @@ fs.writeFileSync(DB_FILE, JSON.stringify(lista, null, 2));
 
 let reservas = await carregarReservas();
 if (usandoRedis) {
-console.log("[Storage] Usando Upstash Redis — dados persistentes.");
+console.log("[Storage] Usando Upstash Redis â dados persistentes.");
 } else {
-console.warn("[Storage] Upstash nao configurado — usando arquivo local.");
+console.warn("[Storage] Upstash nao configurado â usando arquivo local.");
 }
 
 const acharPorNumero = (n) => reservas.find((r) => r.numero === n);
@@ -124,7 +124,7 @@ function nomeValido(s) { return typeof s === "string" && s.length >= 3 && s.leng
 function telegramValido(s) { return typeof s === "string" && s.length >= 2 && s.length <= 40; }
 
 // --------------------------------------------------------------------
-// BOT DO TELEGRAM (modo webhook — sem conflito 409 entre deploys)
+// BOT DO TELEGRAM (modo webhook â sem conflito 409 entre deploys)
 // --------------------------------------------------------------------
 const WEBHOOK_PATH = `/tg/${TELEGRAM_BOT_TOKEN}`;
 const WEBHOOK_URL = `https://numerodasortetg.onrender.com${WEBHOOK_PATH}`;
@@ -161,18 +161,18 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada! 🍀\n\n` +
-  `🏆 NUMERO DA SORTE COPA TGJOGO\n\n` +
-  `🎟️ Seu numero: ${numero}\n` +
-  `🆔 ID do jogador: ${reserva.player_id}\n` +
-  `👤 Nome: ${reserva.nome_real}\n` +
-  `✅ Status: registrado\n\n` +
+  `Participacao confirmada! ð\n\n` +
+  `ð NUMERO DA SORTE COPA TGJOGO\n\n` +
+  `ðï¸ Seu numero: ${numero}\n` +
+  `ð ID do jogador: ${reserva.player_id}\n` +
+  `ð¤ Nome: ${reserva.nome_real}\n` +
+  `â Status: registrado\n\n` +
   `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
 );
 });
 
 // --------------------------------------------------------------------
-// /meu_numero — jogador consulta seu numero pelo bot
+// /meu_numero â jogador consulta seu numero pelo bot
 // --------------------------------------------------------------------
 bot.onText(/\/meu_numero/, async (msg) => {
 const chatId = msg.chat.id;
@@ -185,17 +185,17 @@ if (reserva) {
   const numero = String(reserva.numero).padStart(2, "0");
   bot.sendMessage(
     chatId,
-    "🎯 Seu número da sorte é o *" + numero + "*!\n\n" +
-    "👤 Nome: " + reserva.nome_real + "\n" +
-    "🆔 ID: " + reserva.player_id + "\n\n" +
-    "Boa sorte na Copa TGJOGO! ⚽",
+    "ð¯ Seu nÃºmero da sorte Ã© o *" + numero + "*!\n\n" +
+    "ð¤ Nome: " + reserva.nome_real + "\n" +
+    "ð ID: " + reserva.player_id + "\n\n" +
+    "Boa sorte na Copa TGJOGO! â½",
     { parse_mode: "Markdown" }
   );
 } else {
   bot.sendMessage(
     chatId,
-    "❌ Você ainda não tem um número registrado.\n\n" +
-    "Acesse o site e escolha o seu! 🎟️"
+    "â VocÃª ainda nÃ£o tem um nÃºmero registrado.\n\n" +
+    "Acesse o site e escolha o seu! ðï¸"
   );
 }
 });
@@ -203,9 +203,9 @@ if (reserva) {
 function avisarGradeCheia() {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `🎉 GRADE COMPLETA! - COPA TGJOGO\n\n` +
-  `Todos os ${TOTAL} números foram preenchidos!\n\n` +
-  `O sorteio pode ser realizado agora. 🏆`
+  `ð GRADE COMPLETA! - COPA TGJOGO\n\n` +
+  `Todos os ${TOTAL} nÃºmeros foram preenchidos!\n\n` +
+  `O sorteio pode ser realizado agora. ð`
 ).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
@@ -216,7 +216,7 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `🎟️ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
+  `ðï¸ NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
   `Numero escolhido: ${numero}\n` +
   `ID do jogador: ${reserva.player_id}\n` +
   `Nome real: ${reserva.nome_real}\n` +
@@ -288,7 +288,7 @@ res.sendStatus(200);
 });
 
 // --------------------------------------------------------------------
-// KEEP-ALIVE — usado por UptimeRobot ou similar para evitar cold start
+// KEEP-ALIVE â usado por UptimeRobot ou similar para evitar cold start
 // Configure o monitor para pingar GET /ping a cada 5 minutos
 // --------------------------------------------------------------------
 app.get("/ping", (req, res) => {
@@ -414,13 +414,191 @@ console.log("[Admin] Grade resetada!");
 res.json({ ok: true, mensagem: "Grade resetada com sucesso. Todos os numeros estao disponiveis." });
 });
 
+
+// ===== SORTEIO AO VIVO =====
+function maskName(nome) {
+  if (!nome) return '***';
+  return nome.trim().split(/\s+/).map(function(p) {
+    var vis = Math.min(3, p.length);
+    return p.substring(0, vis) + '*'.repeat(Math.max(4, p.length - vis));
+  }).join(' ');
+}
+
+function maskId(id) {
+  var s = String(id || '');
+  if (!s || s.length <= 4) return '****' + s;
+  return '*'.repeat(s.length - 4) + s.slice(-4);
+}
+
+var sorteiosAtivos = {};
+
+app.post("/api/admin/sortear", checkAdmin, function(req, res) {
+  if (!reservas.length) return res.json({ erro: "Nenhum participante inscrito." });
+  var vencedor = reservas[Math.floor(Math.random() * reservas.length)];
+  var sorteioId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+  sorteiosAtivos[sorteioId] = Object.assign({}, vencedor, { sorteadoEm: new Date().toISOString() });
+  console.log("[Sorteio] " + sorteioId + " - " + vencedor.nome_real + " #" + vencedor.numero);
+  res.json({ ok: true, sorteioId: sorteioId, redirectUrl: "/sorteio-ao-vivo?id_sorteio=" + sorteioId });
+});
+
+app.get("/api/sorteio/:id", function(req, res) {
+  var s = sorteiosAtivos[req.params.id];
+  if (!s) return res.status(404).json({ erro: "Sorteio nao encontrado." });
+  res.json({ numero: s.numero, nomeMascarado: maskName(s.nome_real), idMascarado: maskId(s.player_id), sorteadoEm: s.sorteadoEm });
+});
+
+app.get("/api/sorteio/:id/nomes", function(req, res) {
+  var s = sorteiosAtivos[req.params.id];
+  if (!s) return res.json({ nomes: ["Jogador****","Gamer****","Player****"] });
+  var lista = reservas.map(function(r) { return maskName(r.nome_real); });
+  while (lista.length < 8) lista = lista.concat(lista);
+  lista.sort(function() { return Math.random() - 0.5; });
+  res.json({ nomes: lista });
+});
+
+app.get("/sorteio-ao-vivo", function(req, res) {
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.send(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sorteio ao Vivo - Copa TGJOGO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"><\/script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#061a0d;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(46,158,91,.18),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(255,216,77,.12),transparent 60%),#061a0d;z-index:0}
+.wrap{position:relative;z-index:1;text-align:center;width:92%;max-width:680px;padding:20px 0}
+.logo-tag{font-size:12px;color:#ffd84d;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px;opacity:.75}
+.h1{font-size:clamp(20px,5vw,34px);font-weight:900;margin-bottom:28px;text-shadow:0 0 40px rgba(255,216,77,.4)}
+.slot-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,216,77,.3);border-radius:22px;height:220px;overflow:hidden;position:relative;margin-bottom:20px}
+.slot-box::before,.slot-box::after{content:'';position:absolute;left:0;right:0;height:68px;z-index:2;pointer-events:none}
+.slot-box::before{top:0;background:linear-gradient(#061a0d,transparent)}
+.slot-box::after{bottom:0;background:linear-gradient(transparent,#061a0d)}
+.slot-hl{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:72px;border-top:2px solid rgba(255,216,77,.55);border-bottom:2px solid rgba(255,216,77,.55);background:rgba(255,216,77,.06);z-index:1;pointer-events:none}
+.reel{display:flex;flex-direction:column;align-items:center}
+.reel-item{height:72px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:rgba(255,255,255,.4);padding:0 20px;white-space:nowrap;width:100%;transition:color .08s,font-size .08s}
+.reel-item.hl{color:#ffd84d;font-size:26px;text-shadow:0 0 20px rgba(255,216,77,.7)}
+.fase{font-size:14px;color:#7fb89a;min-height:22px;letter-spacing:.04em}
+.winner{display:none;background:linear-gradient(145deg,#0a3020,#0f4530);border:3px solid #ffd84d;border-radius:26px;padding:32px 36px;box-shadow:0 0 60px rgba(255,216,77,.3);animation:pop .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.4) rotate(-4deg);opacity:0}to{transform:scale(1);opacity:1}}
+.w-tit{font-size:16px;color:#ffd84d;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.w-num{font-size:82px;font-weight:900;color:#ffd84d;line-height:1;margin-bottom:6px;text-shadow:0 0 50px rgba(255,216,77,.7);letter-spacing:.04em}
+.w-rows{display:grid;gap:9px;margin-top:18px;text-align:left}
+.w-row{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.3);border-radius:12px;padding:12px 16px}
+.w-lbl{font-size:11px;color:#7ba891;font-weight:700;text-transform:uppercase;letter-spacing:.08em;min-width:80px}
+.w-val{font-size:16px;font-weight:800;color:#fff;letter-spacing:.06em}
+.badge{background:linear-gradient(90deg,#2e9e5b,#1e8448);color:#fff;font-weight:800;padding:4px 16px;border-radius:20px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="logo-tag">&#x26BD; COPA TGJOGO</div>
+  <div class="h1" id="titH1">&#x1F3B2; SORTEIO AO VIVO</div>
+  <div class="slot-box" id="slotBox">
+    <div class="slot-hl"></div>
+    <div class="reel" id="reel"><div class="reel-item hl">Carregando...</div></div>
+  </div>
+  <div class="winner" id="winnerBox">
+    <div class="w-tit">&#x1F389; GANHADOR SORTEADO &#x1F389;</div>
+    <div class="w-num" id="wNum">&mdash;</div>
+    <div class="w-rows">
+      <div class="w-row"><div class="w-lbl">Nome</div><div class="w-val" id="wNome">&mdash;</div></div>
+      <div class="w-row"><div class="w-lbl">ID TGJOGO</div><div class="w-val" id="wId">&mdash;</div></div>
+      <div class="w-row"><div class="w-lbl">Status</div><div class="w-val"><span class="badge">&#x1F3C6; Premiado</span></div></div>
+    </div>
+  </div>
+  <div class="fase" id="faseEl">Preparando sorteio...</div>
+</div>
+<script>
+var sid = new URLSearchParams(location.search).get('id_sorteio');
+var nomes = [];
+var winner = null;
+var reel = document.getElementById('reel');
+var ROWS = 5;
+function buildReel(arr, hlIdx) {
+  reel.innerHTML = '';
+  arr.forEach(function(n, i) {
+    var d = document.createElement('div');
+    d.className = 'reel-item' + (i === hlIdx ? ' hl' : '');
+    d.textContent = n;
+    reel.appendChild(d);
+  });
+}
+function getWindow(arr, center) {
+  var half = Math.floor(ROWS / 2);
+  var out = [];
+  for (var i = -half; i <= half; i++) {
+    out.push(arr[((center + i) % arr.length + arr.length) % arr.length]);
+  }
+  return out;
+}
+async function init() {
+  if (!sid) { document.getElementById('faseEl').textContent = 'ID invalido.'; return; }
+  try {
+    var r1 = await fetch('/api/sorteio/' + sid + '/nomes');
+    var r2 = await fetch('/api/sorteio/' + sid);
+    var d1 = await r1.json();
+    var d2 = await r2.json();
+    nomes = d1.nomes || ['Jogador****'];
+    winner = d2;
+    if (winner.erro) { document.getElementById('faseEl').textContent = 'Sorteio nao encontrado.'; return; }
+    animar();
+  } catch(e) {
+    document.getElementById('faseEl').textContent = 'Erro ao carregar.';
+  }
+}
+function animar() {
+  document.getElementById('faseEl').textContent = 'Sorteando...';
+  var schedule = [
+    {delay:75, count:22, label:'&#x26A1; Sorteando...'},
+    {delay:130, count:12, label:'&#x1F504; Desacelerando...'},
+    {delay:230, count:8, label:'&#x23F3; Quase la...'},
+    {delay:400, count:5, label:'&#x1F3AF; Prestes a parar...'},
+    {delay:680, count:3, label:'&#x1F3AF; Prestes a parar...'}
+  ];
+  var fi = 0, ci = 0, pos = 0;
+  function step() {
+    var f = schedule[fi];
+    document.getElementById('faseEl').innerHTML = f.label;
+    pos = (pos + 1) % nomes.length;
+    buildReel(getWindow(nomes, pos), Math.floor(ROWS / 2));
+    ci++;
+    if (ci >= f.count) { fi++; ci = 0; }
+    if (fi >= schedule.length) { setTimeout(revelar, 500); return; }
+    setTimeout(step, schedule[fi].delay);
+  }
+  setTimeout(step, 700);
+}
+function revelar() {
+  document.getElementById('slotBox').style.display = 'none';
+  document.getElementById('faseEl').style.display = 'none';
+  document.getElementById('titH1').textContent = '\uD83C\uDFC6 GANHADOR';
+  document.getElementById('wNum').textContent = ('000' + winner.numero).slice(-3);
+  document.getElementById('wNome').textContent = winner.nomeMascarado;
+  document.getElementById('wId').textContent = winner.idMascarado;
+  document.getElementById('winnerBox').style.display = 'block';
+  var c = confetti;
+  setTimeout(function(){ c({particleCount:130,spread:80,origin:{y:.6},colors:['#ffd84d','#f5a623','#fff','#2e9e5b']}); },200);
+  setTimeout(function(){ c({particleCount:90,spread:100,angle:60,origin:{y:.5,x:.1},colors:['#ffd84d','#fff']}); },600);
+  setTimeout(function(){ c({particleCount:90,spread:100,angle:120,origin:{y:.5,x:.9},colors:['#ffd84d','#fff']}); },1000);
+  setTimeout(function(){ c({particleCount:60,spread:50,origin:{y:.3},colors:['#ffd84d','#27ae60']}); },1500);
+}
+init();
+<\/script>
+</body>
+</html>`);
+});
+
 app.get("/admin", checkAdmin, (req, res) => {
 res.send(`<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Admin · Copa TGJOGO</title>
+<title>Admin Â· Copa TGJOGO</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -474,45 +652,45 @@ input[type=text]::placeholder{color:#9fc4b3}
 </head>
 <body>
 <div class="wrap">
-<h1>🏆 Painel Admin · Copa TGJOGO</h1>
+<h1>ð Painel Admin Â· Copa TGJOGO</h1>
 <div class="sub" id="atualizado">Carregando...</div>
 
 <div class="stats">
-<div class="stat"><div class="n" id="sTotal">—</div><div class="l">Inscritos</div></div>
-<div class="stat"><div class="n" id="sDisp">—</div><div class="l">Disponíveis</div></div>
-<div class="stat"><div class="n" id="sBot">—</div><div class="l">Confirmados no Bot</div></div>
-<div class="stat"><div class="n" id="sPct">—</div><div class="l">% Bot confirmado</div></div>
+<div class="stat"><div class="n" id="sTotal">â</div><div class="l">Inscritos</div></div>
+<div class="stat"><div class="n" id="sDisp">â</div><div class="l">DisponÃ­veis</div></div>
+<div class="stat"><div class="n" id="sBot">â</div><div class="l">Confirmados no Bot</div></div>
+<div class="stat"><div class="n" id="sPct">â</div><div class="l">% Bot confirmado</div></div>
 </div>
 
 <div class="btns">
-<a class="btn" href="/api/admin/exportar">⬇️ Exportar CSV</a>
-<button class="btn-sortear" onclick="sortearPreview()">🎲 Sortear (Preview)</button>
-<button class="btn-reset" onclick="resetarGrade()">🗑️ Resetar Grade</button>
+<a class="btn" href="/api/admin/exportar">â¬ï¸ Exportar CSV</a>
+<button class="btn-sortear" onclick="sortear()">&#x1F3AF; Sortear Ganhador</button>
+<button class="btn-reset" onclick="resetarGrade()">ðï¸ Resetar Grade</button>
 </div>
 
 <div class="chart-box">
-<h2>📈 Inscrições por hora</h2>
+<h2>ð InscriÃ§Ãµes por hora</h2>
 <canvas id="chartHoras"></canvas>
 </div>
 
-<div class="refresh">🔄 Atualiza automaticamente a cada 30 segundos</div>
+<div class="refresh">ð Atualiza automaticamente a cada 30 segundos</div>
 <div class="filters">
 <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
-<button class="filter-btn" onclick="setFiltro('confirmado',this)">✅ Confirmado no Bot</button>
-<button class="filter-btn" onclick="setFiltro('pendente',this)">⏳ Pendente</button>
+<button class="filter-btn" onclick="setFiltro('confirmado',this)">â Confirmado no Bot</button>
+<button class="filter-btn" onclick="setFiltro('pendente',this)">â³ Pendente</button>
 <input type="text" id="busca" placeholder="Buscar por nome, ID ou Telegram..." oninput="filtrar()" style="margin-left:auto"/>
 </div>
 
 <table>
 <thead>
 <tr>
-<th>Nº</th>
+<th>NÂº</th>
 <th>ID TGJOGO</th>
 <th>Nome Real</th>
 <th>Telegram</th>
 <th>Bot</th>
 <th>Data/Hora</th>
-<th>Ações</th>
+<th>AÃ§Ãµes</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -522,11 +700,11 @@ input[type=text]::placeholder{color:#9fc4b3}
 <!-- Modal sorteio -->
 <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
 <div class="modal">
-<h2>🎲 Número Sorteado (Preview)</h2>
-<div class="num-grande" id="mNumero">—</div>
-<div class="nome-sort" id="mNome">—</div>
-<div class="id-sort" id="mId">—</div>
-<div class="aviso">⚠️ Este é apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
+<h2>ð² NÃºmero Sorteado (Preview)</h2>
+<div class="num-grande" id="mNumero">â</div>
+<div class="nome-sort" id="mNome">â</div>
+<div class="id-sort" id="mId">â</div>
+<div class="aviso">â ï¸ Este Ã© apenas um preview. Para oficializar, use o comando /sortear no bot (em breve).</div>
 <button class="btn-fechar" onclick="document.getElementById('modalOverlay').classList.remove('show')">Fechar</button>
 </div>
 </div>
@@ -546,7 +724,7 @@ document.getElementById('sTotal').textContent = d.total;
 document.getElementById('sDisp').textContent = d.disponiveis;
 document.getElementById('sBot').textContent = confirmados;
 document.getElementById('sPct').textContent = d.total > 0 ? Math.round(confirmados/d.total*100) + '%' : '\u2014';
-document.getElementById('atualizado').textContent = 'Última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+document.getElementById('atualizado').textContent = 'Ãltima atualizaÃ§Ã£o: ' + new Date().toLocaleTimeString('pt-BR');
 filtrar();
 renderChart();
 } catch(e) {
@@ -605,7 +783,7 @@ type: 'bar',
 data: {
 labels,
 datasets: [{
-label: 'Inscrições',
+label: 'InscriÃ§Ãµes',
 data,
 backgroundColor: 'rgba(255,216,77,.7)',
 borderColor: '#ffd84d',
@@ -624,13 +802,15 @@ y: { ticks: { color: '#9fc4b3', stepSize: 1 }, grid: { color: 'rgba(255,255,255,
 });
 }
 
-function sortearPreview() {
+async function sortear() {
 if (!todos.length) { alert('Nenhum participante inscrito.'); return; }
-const sorteado = todos[Math.floor(Math.random() * todos.length)];
-document.getElementById('mNumero').textContent = sorteado.numero;
-document.getElementById('mNome').textContent = sorteado.nome_real;
-document.getElementById('mId').textContent = sorteado.player_id + ' · ' + sorteado.telegram_nome;
-document.getElementById('modalOverlay').classList.add('show');
+if (!confirm('Sortear o ganhador OFICIAL agora?\nEsta acao nao pode ser desfeita.')) return;
+try {
+const r = await fetch('/api/admin/sortear', { method: 'POST', credentials: 'include' });
+const d = await r.json();
+if (d.ok) { window.open(d.redirectUrl, '_blank'); }
+else { alert('Erro: ' + (d.erro || 'desconhecido')); }
+} catch(e) { alert('Erro: ' + e.message); }
 }
 
 function fecharModal(e) {
@@ -640,24 +820,24 @@ document.getElementById('modalOverlay').classList.remove('show');
 
 async function liberar(numero) {
 const n = String(numero).padStart(2, '0');
-if (!confirm('Liberar o número ' + n + '?\\nEsta ação remove o participante e libera o slot.')) return;
+if (!confirm('Liberar o nÃºmero ' + n + '?\\nEsta aÃ§Ã£o remove o participante e libera o slot.')) return;
 try {
 const r = await fetch('/api/admin/liberar/' + numero, { method: 'POST' });
 const d = await r.json();
-if (d.ok) { alert('\u2705 Número ' + n + ' liberado!'); carregar(); }
+if (d.ok) { alert('\u2705 NÃºmero ' + n + ' liberado!'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexão.'); }
+} catch(e) { alert('Erro de conexÃ£o.'); }
 }
 
 async function resetarGrade() {
-if (!confirm('\u26a0\ufe0f ATENÇÃO: Isso vai apagar TODOS os participantes e liberar todos os números.\\n\\nTem certeza?')) return;
-if (!confirm('Segunda confirmação: realmente resetar toda a grade?')) return;
+if (!confirm('\u26a0\ufe0f ATENÃÃO: Isso vai apagar TODOS os participantes e liberar todos os nÃºmeros.\\n\\nTem certeza?')) return;
+if (!confirm('Segunda confirmaÃ§Ã£o: realmente resetar toda a grade?')) return;
 try {
 const r = await fetch('/api/admin/reset', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ confirmacao: 'RESETAR' }) });
 const d = await r.json();
-if (d.ok) { alert('\u2705 Grade resetada! Todos os números estão disponíveis.'); carregar(); }
+if (d.ok) { alert('\u2705 Grade resetada! Todos os nÃºmeros estÃ£o disponÃ­veis.'); carregar(); }
 else alert('Erro: ' + d.erro);
-} catch(e) { alert('Erro de conexão.'); }
+} catch(e) { alert('Erro de conexÃ£o.'); }
 }
 
 carregar();
@@ -670,6 +850,6 @@ setInterval(carregar, 30000);
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
 console.log(`Grade configurada de 1 a ${TOTAL}.`);
-if (ADMIN_PASSWORD) console.log("[Admin] Painel disponível em /admin");
+if (ADMIN_PASSWORD) console.log("[Admin] Painel disponÃ­vel em /admin");
 else console.warn("[Admin] ADMIN_PASSWORD nao definido - painel desabilitado.");
 })
