@@ -995,6 +995,18 @@ setInterval(carregar, 30000);
     }
   }
   carregarHistorico();
+
+async function carregarDataSorteio() {
+  try {
+    var r = await fetch('/api/sorteio-info');
+    var d = await r.json();
+    if (d.ok && d.dataHoraSorteio) {
+      document.getElementById('inputDataSorteio').value = d.dataHoraSorteio;
+      document.getElementById('dataSorteioInfo').textContent = 'Definido: ' + new Date(d.dataHoraSorteio).toLocaleString('pt-BR');
+    }
+  } catch(e) {}
+}
+carregarDataSorteio();
 </script>
 </body>
 </html>`);
