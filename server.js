@@ -340,7 +340,10 @@ app.post("/api/confirmar", limiteConfirmar, async (req, res) => {
 
   if (!inscricoesAbertas) {
     return res.status(403).json({ ok: false, erro: "As inscrições estão encerradas." });
-  }const numero = Number(req.body?.numero);
+  }  if (dataHoraSorteio && new Date() >= new Date(dataHoraSorteio)) {
+    return res.status(403).json({ ok: false, erro: "O prazo para participar encerrou." });
+  }
+const numero = Number(req.body?.numero);
 const playerId = sanitizar(String(req.body?.playerId ?? ""));
 const nomeReal = sanitizar(String(req.body?.nomeReal ?? ""));
 const telegramNome = sanitizar(String(req.body?.telegramNome ?? ""));
