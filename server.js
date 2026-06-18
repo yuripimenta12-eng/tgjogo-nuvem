@@ -1007,6 +1007,11 @@ async function carregarDataSorteio() {
       document.getElementById('inputDataSorteio').value = d.dataHoraSorteio;
       document.getElementById('dataSorteioInfo').textContent = 'Definido: ' + new Date(d.dataHoraSorteio).toLocaleString('pt-BR');
     }
+    var btn = document.getElementById('btnToggleInscricoes');
+    if (btn) {
+      btn.innerHTML = d.inscricoesAbertas === false ? '🔓 Abrir Inscrições' : '🔒 Encerrar Inscrições';
+      btn.style.background = d.inscricoesAbertas === false ? '#27ae60' : '#e67e22';
+    }
   } catch(e) {}
 }
 carregarDataSorteio();
