@@ -158,6 +158,18 @@ if (!reserva) {
 
 reserva.telegram_chat = chatId;
 salvarReservas(reservas);
+  // Notificar admin quando participante confirma no bot
+  if (TELEGRAM_TEAM_CHAT_ID && !TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) {
+    var _num = String(reserva.numero).padStart(3, "0");
+    var _tg = msg.from.username ? "@" + msg.from.username : msg.from.first_name;
+    bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
+      "✅ Confirmou no bot!\n\n" +
+      "Nome: " + reserva.nome_real + "\n" +
+      "ID TGJOGO: " + reserva.player_id + "\n" +
+      "Número: " + _num + "\n" +
+      "Telegram: " + _tg
+    ).catch(function(e) { console.error("[Bot] Notif admin:", e.message); });
+  }
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
@@ -313,7 +325,10 @@ res.json({ ok: true, grade });
 });
 
 app.post("/api/confirmar", limiteConfirmar, async (req, res) => {
-const numero = Number(req.body?.numero);
+
+  if (!inscricoesAbertas) {
+    return res.status(403).json({ ok: false, erro: "As inscrições estão encerradas." });
+  }const numero = Number(req.body?.numero);
 const playerId = sanitizar(String(req.body?.playerId ?? ""));
 const nomeReal = sanitizar(String(req.body?.nomeReal ?? ""));
 const telegramNome = sanitizar(String(req.body?.telegramNome ?? ""));
@@ -430,13 +445,45 @@ function maskId(id) {
   return '*'.repeat(s.length - 4) + s.slice(-4);
 }
 
+// ---------------------------------------------------------------
+// SORTEIOS — persistidos no Redis
+// ---------------------------------------------------------------
+const REDIS_KEY_SORTEIOS = "tgjogo:sorteios";
 var sorteiosAtivos = {};
+
+async function salvarSorteios() {
+  if (usandoRedis) {
+    try { await redisSet(REDIS_KEY_SORTEIOS, sorteiosAtivos); }
+    catch (e) { console.error("[Redis] Erro salvar sorteios:", e.message); }
+  }
+}
+
+sorteiosAtivos = usandoRedis ? (await redisGet(REDIS_KEY_SORTEIOS) || {}) : {};
+console.log("[Redis] Sorteios carregados:", Object.keys(sorteiosAtivos).length);
+
+// ---------------------------------------------------------------
+// ESTADO — inscricoes abertas/fechadas
+// ---------------------------------------------------------------
+const REDIS_KEY_ESTADO = "tgjogo:estado";
+var inscricoesAbertas = true;
+
+async function salvarEstado() {
+  if (usandoRedis) {
+    try { await redisSet(REDIS_KEY_ESTADO, { inscricoesAbertas }); }
+    catch (e) { console.error("[Redis] Erro salvar estado:", e.message); }
+  }
+}
+
+const _estado = usandoRedis ? (await redisGet(REDIS_KEY_ESTADO) || {}) : {};
+inscricoesAbertas = _estado.inscricoesAbertas !== false;
+console.log("[Estado] Inscricoes:", inscricoesAbertas ? "abertas" : "fechadas");
 
 app.post("/api/admin/sortear", checkAdmin, function(req, res) {
   if (!reservas.length) return res.json({ erro: "Nenhum participante inscrito." });
   var vencedor = reservas[Math.floor(Math.random() * reservas.length)];
   var sorteioId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
   sorteiosAtivos[sorteioId] = Object.assign({}, vencedor, { sorteadoEm: new Date().toISOString() });
+  salvarSorteios();
   console.log("[Sorteio] " + sorteioId + " - " + vencedor.nome_real + " #" + vencedor.numero);
 
   // Notificar ganhador no Telegram (apenas se tiver confirmado no bot)
@@ -686,6 +733,7 @@ input[type=text]::placeholder{color:#9fc4b3}
 <div class="btns">
 <a class="btn" href="/api/admin/exportar">&#x2B07;&#xFE0F; Exportar CSV</a>
 <button class="btn-sortear" onclick="sortear()">&#x1F3AF; Sortear Ganhador</button>
+          <button id="btnToggleInscricoes" onclick="toggleInscricoes()" style="background:#e67e22;color:#fff;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;margin-left:8px;">&#x1F512; Encerrar Inscri&#xe7;&#xf5;es</button>
 <button class="btn-reset" onclick="resetarGrade()">&#x1F5D1;&#xFE0F; Resetar Grade</button>
 </div>
 
@@ -863,9 +911,30 @@ else alert('Erro: ' + d.erro);
 
 carregar();
 setInterval(carregar, 30000);
+  async function toggleInscricoes() {
+    const btn = document.getElementById('btnToggleInscricoes');
+    btn.disabled = true;
+    try {
+      const r = await fetch('/api/admin/toggle-inscricoes', { method: 'POST', credentials: 'include' });
+      const d = await r.json();
+      if (d.ok) {
+        btn.innerHTML = d.inscricoesAbertas ? '&#x1F512; Encerrar Inscri&#xe7;&#xf5;es' : '&#x1F513; Abrir Inscri&#xe7;&#xf5;es';
+        btn.style.background = d.inscricoesAbertas ? '#e67e22' : '#27ae60';
+        alert(d.inscricoesAbertas ? 'Inscrições ABERTAS!' : 'Inscrições ENCERRADAS!');
+      } else { alert(d.erro || 'Erro'); }
+    } catch(e) { alert('Erro: ' + e.message); }
+    btn.disabled = false;
+  }
 </script>
 </body>
 </html>`);
+});
+
+app.post("/api/admin/toggle-inscricoes", checkAdmin, async function(req, res) {
+  inscricoesAbertas = !inscricoesAbertas;
+  await salvarEstado();
+  console.log("[Admin] Inscricoes:", inscricoesAbertas ? "abertas" : "fechadas");
+  res.json({ ok: true, inscricoesAbertas });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
