@@ -466,16 +466,18 @@ console.log("[Redis] Sorteios carregados:", Object.keys(sorteiosAtivos).length);
 // ---------------------------------------------------------------
 const REDIS_KEY_ESTADO = "tgjogo:estado";
 var inscricoesAbertas = true;
+var dataHoraSorteio = null;
 
 async function salvarEstado() {
   if (usandoRedis) {
-    try { await redisSet(REDIS_KEY_ESTADO, { inscricoesAbertas }); }
+    try { await redisSet(REDIS_KEY_ESTADO, { inscricoesAbertas, dataHoraSorteio }); }
     catch (e) { console.error("[Redis] Erro salvar estado:", e.message); }
   }
 }
 
 const _estado = usandoRedis ? (await redisGet(REDIS_KEY_ESTADO) || {}) : {};
 inscricoesAbertas = _estado.inscricoesAbertas !== false;
+dataHoraSorteio = _estado.dataHoraSorteio || null;
 console.log("[Estado] Inscricoes:", inscricoesAbertas ? "abertas" : "fechadas");
 
 app.post("/api/admin/sortear", checkAdmin, function(req, res) {
@@ -734,6 +736,13 @@ input[type=text]::placeholder{color:#9fc4b3}
 <a class="btn" href="/api/admin/exportar">&#x2B07;&#xFE0F; Exportar CSV</a>
 <button class="btn-sortear" onclick="sortear()">&#x1F3AF; Sortear Ganhador</button>
           <button id="btnToggleInscricoes" onclick="toggleInscricoes()" style="background:#e67e22;color:#fff;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;margin-left:8px;">&#x1F512; Encerrar Inscri&#xe7;&#xf5;es</button>
+          <!-- DATA DO SORTEIO -->
+          <div style="margin-top:12px;padding:11px 16px;background:rgba(255,216,77,.06);border:1px solid rgba(255,216,77,.2);border-radius:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="color:#ffd84d;font-weight:700;font-size:13px;">&#x23F0; Data do Sorteio:</span>
+            <input type="datetime-local" id="inputDataSorteio" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#fff;padding:6px 10px;font-size:13px;" />
+            <button onclick="definirDataSorteio()" style="background:#f5a623;color:#0a2a20;border:none;border-radius:6px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;">Definir</button>
+            <span id="dataSorteioInfo" style="font-size:12px;color:#9fc4b3;"></span>
+          </div>
 <button class="btn-reset" onclick="resetarGrade()">&#x1F5D1;&#xFE0F; Resetar Grade</button>
 </div>
 
@@ -764,6 +773,11 @@ input[type=text]::placeholder{color:#9fc4b3}
 </thead>
 <tbody id="tbody"></tbody>
 </table>
+          <!-- HISTORICO DE SORTEIOS -->
+          <div style="margin-top:28px">
+            <h3 style="color:#ffd84d;font-size:15px;font-weight:700;margin-bottom:12px">&#x1F3C6; Hist&#xf3;rico de Sorteios</h3>
+            <div id="historicoContainer"><p style="color:#9fc4b3;font-size:13px">Carregando...</p></div>
+          </div>
 </div>
 
 <!-- Modal sorteio -->
@@ -925,6 +939,50 @@ setInterval(carregar, 30000);
     } catch(e) { alert('Erro: ' + e.message); }
     btn.disabled = false;
   }
+  async function definirDataSorteio() {
+    var val = document.getElementById('inputDataSorteio').value;
+    if (!val) { alert('Selecione uma data e hora.'); return; }
+    var r = await fetch('/api/admin/set-countdown', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ dataHora: val }) });
+    var d = await r.json();
+    if (d.ok) {
+      document.getElementById('dataSorteioInfo').textContent = 'Definido: ' + new Date(val).toLocaleString('pt-BR');
+      alert('Data do sorteio definida!');
+    }
+  }
+
+  async function carregarHistorico() {
+    try {
+      var r = await fetch('/api/admin/sorteios', { credentials: 'include' });
+      var d = await r.json();
+      var cont = document.getElementById('historicoContainer');
+      if (!d.ok || !d.sorteios || !d.sorteios.length) {
+        cont.innerHTML = '<p style="color:#9fc4b3;font-size:13px;padding:8px 0">Nenhum sorteio realizado ainda.</p>';
+        return;
+      }
+      var rows = d.sorteios.map(function(s) {
+        var dt = new Date(s.sorteadoEm).toLocaleString('pt-BR');
+        var num = String(s.numero).padStart(3,'0');
+        var bot = s.telegram_chat ? '&#x2705;' : '&#x2014;';
+        return '<tr style="border-bottom:1px solid rgba(255,255,255,.07)">' +
+          '<td style="padding:7px 10px;color:#9fc4b3;font-size:12px">' + dt + '</td>' +
+          '<td style="padding:7px 10px;color:#ffd84d;font-weight:700">' + num + '</td>' +
+          '<td style="padding:7px 10px">' + (s.nome_real||'&mdash;') + '</td>' +
+          '<td style="padding:7px 10px;color:#9fc4b3">' + (s.player_id||'&mdash;') + '</td>' +
+          '<td style="padding:7px 10px;text-align:center">' + bot + '</td></tr>';
+      }).join('');
+      cont.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+        '<tr style="color:#9fc4b3;font-size:11px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.15)">' +
+        '<th style="padding:7px 10px;text-align:left">Data/Hora</th>' +
+        '<th style="padding:7px 10px;text-align:left">N&deg;</th>' +
+        '<th style="padding:7px 10px;text-align:left">Nome</th>' +
+        '<th style="padding:7px 10px;text-align:left">ID</th>' +
+        '<th style="padding:7px 10px;text-align:center">Bot</th></tr>' +
+        rows + '</table>';
+    } catch(e) {
+      document.getElementById('historicoContainer').innerHTML = '<p style="color:#9fc4b3;font-size:13px">Erro ao carregar hist&oacute;rico.</p>';
+    }
+  }
+  carregarHistorico();
 </script>
 </body>
 </html>`);
@@ -936,6 +994,25 @@ app.post("/api/admin/toggle-inscricoes", checkAdmin, async function(req, res) {
   console.log("[Admin] Inscricoes:", inscricoesAbertas ? "abertas" : "fechadas");
   res.json({ ok: true, inscricoesAbertas });
 });
+app.get("/api/sorteio-info", function(req, res) {
+  res.json({ ok: true, dataHoraSorteio, inscricoesAbertas });
+});
+
+app.post("/api/admin/set-countdown", checkAdmin, async function(req, res) {
+  var dh = req.body && req.body.dataHora ? req.body.dataHora : null;
+  dataHoraSorteio = dh;
+  await salvarEstado();
+  console.log("[Admin] Data sorteio:", dataHoraSorteio || "removida");
+  res.json({ ok: true, dataHoraSorteio });
+});
+
+app.get("/api/admin/sorteios", checkAdmin, function(req, res) {
+  var lista = Object.entries(sorteiosAtivos).map(function(entry) {
+    return Object.assign({ sorteioId: entry[0] }, entry[1]);
+  }).sort(function(a, b) { return new Date(b.sorteadoEm) - new Date(a.sorteadoEm); });
+  res.json({ ok: true, sorteios: lista });
+});
+
 
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Servidor no ar na porta ${PORT}.`);
