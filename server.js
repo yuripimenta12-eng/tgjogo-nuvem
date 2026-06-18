@@ -247,7 +247,7 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cors({ origin: ALLOWED_ORIGIN }));
-app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"], styleSrc: ["'self'", "'unsafe-inline'", 'https:'], imgSrc: ["'self'", 'data:', 'https:'], connectSrc: ["'self'"] } } }));
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.static(path.join(__dirname, "site"), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith(".html")) {
