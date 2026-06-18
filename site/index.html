@@ -336,6 +336,22 @@ const data=await r.json();
 if(!data.ok){
 showMsg(data.erro||"Não foi possível confirmar.");
 $("btnConfirmar").disabled=false; $("btnConfirmar").textContent="✅ Confirmar participação";
+function bloquearParticipacao() {
+  if (document.getElementById('lockOverlay')) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'lockOverlay';
+  overlay.style.cssText = 'background:rgba(10,42,32,.9);border:2px solid rgba(255,100,100,.4);border-radius:14px;padding:28px 20px;text-align:center;margin:18px 0;';
+  overlay.innerHTML = '<div style="font-size:40px">\uD83D\uDD12</div><div style="color:#ff6b6b;font-weight:700;font-size:17px;margin-top:8px">Inscri\u00E7\u00F5es Encerradas</div><div style="color:#9fc4b3;font-size:13px;margin-top:6px">O prazo para participa\u00E7\u00E3o foi encerrado.</div>';
+  var grid = document.getElementById('grid');
+  if (grid) {
+    grid.style.pointerEvents = 'none';
+    grid.style.opacity = '0.4';
+    grid.parentNode.insertBefore(overlay, grid);
+  }
+  var btn = document.getElementById('btnConfirmar');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; btn.textContent = '\uD83D\uDD12 Inscri\u00E7\u00F5es Encerradas'; }
+}
+
 async function carregarCountdown() {
     try {
       const r = await fetch(API_BASE + "/api/sorteio-info");
@@ -344,12 +360,14 @@ async function carregarCountdown() {
       const card = $("countdownCard");
       card.style.display = "block";
       const target = new Date(d.dataHoraSorteio);
+        if (new Date() >= target || d.inscricoesAbertas === false) { bloquearParticipacao(); }
       function atualiza() {
         const diff = target - new Date();
         if (diff <= 0) {
           $("countdownTimer").textContent = "🏆 Sorteio!";
           clearInterval(iv);
-          return;
+          bloquearParticipacao();
+            return;
         }
         const days = Math.floor(diff / 86400000);
         const hh = Math.floor((diff % 86400000) / 3600000);
