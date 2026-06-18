@@ -5,6 +5,7 @@
 import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import TelegramBot from "node-telegram-bot-api";
 import dotenv from "dotenv";
 import crypto from "crypto";
@@ -246,6 +247,7 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cors({ origin: ALLOWED_ORIGIN }));
+app.use(helmet());
 app.use(express.static(path.join(__dirname, "site"), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith(".html")) {
@@ -313,6 +315,16 @@ res.json({ ok: true, ts: Date.now(), inscritos: reservas.length, disponiveis: TO
 app.get("/api/config", (req, res) => {
 res.json({ ok: true, total: TOTAL, botUsername: username });
 });
+// Rate limit especifico para rotas admin: max 20 por 5 min por IP
+const limiteAdmin = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, erro: "Muitas tentativas no admin. Aguarde 5 minutos." },
+});
+
+app.use('/api/admin', limiteAdmin);
 
 app.get("/api/grade", (req, res) => {
 const mapa = {};
