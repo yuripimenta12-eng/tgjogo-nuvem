@@ -103,6 +103,13 @@ footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted)}
 <p>Escolha seu número da sorte e participe do sorteio especial da Copa!</p>
 </header>
 
+  <!-- COUNTDOWN DO SORTEIO -->
+  <div id="countdownCard" style="display:none;background:rgba(255,216,77,.08);border:1px solid rgba(255,216,77,.3);border-radius:18px;padding:22px 20px;margin-top:18px;text-align:center;">
+    <div style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:10px;">⏰ Sorteio em</div>
+    <div id="countdownTimer" style="font-size:clamp(40px,11vw,68px);font-weight:900;color:var(--gold);letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:1;">--:--:--</div>
+    <div id="countdownDate" style="font-size:13px;color:#d7ece1;margin-top:8px;"></div>
+  </div>
+
 <!-- REGULAMENTO -->
 <div class="rules-card">
 <button class="rules-toggle" id="rulesToggle" onclick="toggleRules()">
@@ -329,7 +336,40 @@ const data=await r.json();
 if(!data.ok){
 showMsg(data.erro||"Não foi possível confirmar.");
 $("btnConfirmar").disabled=false; $("btnConfirmar").textContent="✅ Confirmar participação";
-carregarGrade();
+async function carregarCountdown() {
+    try {
+      const r = await fetch(API_BASE + "/api/sorteio-info");
+      const d = await r.json();
+      if (!d.ok || !d.dataHoraSorteio) return;
+      const card = $("countdownCard");
+      card.style.display = "block";
+      const target = new Date(d.dataHoraSorteio);
+      function atualiza() {
+        const diff = target - new Date();
+        if (diff <= 0) {
+          $("countdownTimer").textContent = "🏆 Sorteio!";
+          clearInterval(iv);
+          return;
+        }
+        const days = Math.floor(diff / 86400000);
+        const hh = Math.floor((diff % 86400000) / 3600000);
+        const mm = Math.floor((diff % 3600000) / 60000);
+        const ss = Math.floor((diff % 60000) / 1000);
+        $("countdownTimer").textContent =
+          (days > 0 ? days + "d " : "") +
+          String(hh).padStart(2,"0") + ":" +
+          String(mm).padStart(2,"0") + ":" +
+          String(ss).padStart(2,"0");
+        $("countdownDate").textContent =
+          target.toLocaleString("pt-BR", { dateStyle:"full", timeStyle:"short" });
+      }
+      atualiza();
+      const iv = setInterval(atualiza, 1000);
+    } catch(e) {}
+  }
+  carregarCountdown();
+
+  carregarGrade();
 return;
 }
 $("painel").classList.add("hidden");
