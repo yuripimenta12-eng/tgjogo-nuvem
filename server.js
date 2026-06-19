@@ -218,8 +218,7 @@ if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
   '\uD83C\uDFC6 GRADE COMPLETA! - COPA TGJOGO\n\n' +
   'Todos os ' + TOTAL + ' n\u00fameros foram preenchidos!\n\n' +
-  'O sorteio pode ser realizado agora. \uD83C\uDFC6'
-)).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
+  'O sorteio pode ser realizado agora. \uD83C\uDFC6').catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
 function avisarEquipe(reserva) {
@@ -237,7 +236,7 @@ bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
   'Status: Participa\u00e7\u00e3o registrada\n' +
   'Data: ' + data + '\n' +
   'Hora: ' + hora
-)).catch((e) => console.error("Erro ao avisar equipe:", e.message));
+).catch((e) => console.error("Erro ao avisar equipe:", e.message));
 }
 
 // --------------------------------------------------------------------
