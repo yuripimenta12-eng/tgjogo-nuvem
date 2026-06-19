@@ -174,13 +174,13 @@ salvarReservas(reservas);
 
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(chatId,
-  `Participacao confirmada! Ã°ÂÂÂ\n\n` +
-  `&#x1F3C6; NUMERO DA SORTE COPA TGJOGO\n\n` +
-  `Ã°ÂÂÂÃ¯Â¸Â Seu numero: ${numero}\n` +
-  `Ã°ÂÂÂ ID do jogador: ${reserva.player_id}\n` +
-  `Ã°ÂÂÂ¤ Nome: ${reserva.nome_real}\n` +
-  `&#x2705; Status: registrado\n\n` +
-  `Aguarde o sorteio oficial aqui no Telegram. Boa sorte!`
+  '\uD83C\uDF40 Participa\u00e7\u00e3o confirmada!\n\n' +
+  '\uD83C\uDFC6 NUMERO DA SORTE COPA TGJOGO\n\n' +
+  '\uD83C\uDFAF Seu numero: ' + numero + '\n' +
+  '\uD83C\uDFAE ID do jogador: ' + reserva.player_id + '\n' +
+  '\uD83D\uDC64 Nome: ' + reserva.nome_real + '\n' +
+  '\u2705 Status: registrado\n\n' +
+  'Aguarde o sorteio oficial aqui no Telegram. Boa sorte!'
 );
 });
 
@@ -197,29 +197,29 @@ if (!reserva && msg.from.username) {
 if (reserva) {
   const numero = String(reserva.numero).padStart(2, "0");
   bot.sendMessage(
-    chatId,
-    "Ã°ÂÂÂ¯ Seu número da sorte é o *" + numero + "*!\n\n" +
-    "Ã°ÂÂÂ¤ Nome: " + reserva.nome_real + "\n" +
-    "Ã°ÂÂÂ ID: " + reserva.player_id + "\n\n" +
-    "Boa sorte na Copa TGJOGO! Ã¢ÂÂ½",
-    { parse_mode: "Markdown" }
-  );
+  chatId,
+  '\uD83D\uDCAF Seu n\u00famero da sorte \u00e9 o *' + numero + '*!\n\n' +
+  '\uD83D\uDC64 Nome: ' + reserva.nome_real + '\n' +
+  '\uD83C\uDFAE ID: ' + reserva.player_id + '\n\n' +
+  'Boa sorte na Copa TGJOGO! \u26BD',
+  { parse_mode: 'Markdown' }
+);
 } else {
   bot.sendMessage(
-    chatId,
-    "Ã¢ÂÂ VocÃÂª ainda não tem um número registrado.\n\n" +
-    "Acesse o site e escolha o seu! Ã°ÂÂÂÃ¯Â¸Â"
-  );
+  chatId,
+  '\u274C Voc\u00ea ainda n\u00e3o tem um n\u00famero registrado.\n\n' +
+  'Acesse o site e escolha o seu! \uD83C\uDFAF'
+);
 }
 });
 
 function avisarGradeCheia() {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `Ã°ÂÂÂ GRADE COMPLETA! - COPA TGJOGO\n\n` +
-  `Todos os ${TOTAL} números foram preenchidos!\n\n` +
-  `O sorteio pode ser realizado agora. &#x1F3C6;`
-).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
+  '\uD83C\uDFC6 GRADE COMPLETA! - COPA TGJOGO\n\n' +
+  'Todos os ' + TOTAL + ' n\u00fameros foram preenchidos!\n\n' +
+  'O sorteio pode ser realizado agora. \uD83C\uDFC6'
+)).catch((e) => console.error("Erro ao avisar grade cheia:", e.message));
 }
 
 function avisarEquipe(reserva) {
@@ -229,15 +229,15 @@ const data = agora.toLocaleDateString("pt-BR");
 const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
-  `Ã°ÂÂÂÃ¯Â¸Â NOVA PARTICIPACAO - COPA TGJOGO\n\n` +
-  `Numero escolhido: ${numero}\n` +
-  `ID do jogador: ${reserva.player_id}\n` +
-  `Nome real: ${reserva.nome_real}\n` +
-  `Telegram: ${reserva.telegram_nome}\n` +
-  `Status: Participacao registrada\n` +
-  `Data: ${data}\n` +
-  `Hora: ${hora}`
-).catch((e) => console.error("Erro ao avisar equipe:", e.message));
+  '\uD83C\uDFAF NOVA PARTICIPACAO - COPA TGJOGO\n\n' +
+  'Numero escolhido: ' + numero + '\n' +
+  'ID do jogador: ' + reserva.player_id + '\n' +
+  'Nome real: ' + reserva.nome_real + '\n' +
+  'Telegram: ' + reserva.telegram_nome + '\n' +
+  'Status: Participa\u00e7\u00e3o registrada\n' +
+  'Data: ' + data + '\n' +
+  'Hora: ' + hora
+)).catch((e) => console.error("Erro ao avisar equipe:", e.message));
 }
 
 // --------------------------------------------------------------------
