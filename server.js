@@ -224,8 +224,8 @@ bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
 function avisarEquipe(reserva) {
 if (!TELEGRAM_TEAM_CHAT_ID || TELEGRAM_TEAM_CHAT_ID.includes("xxxx")) return;
 const agora = new Date();
-const data = agora.toLocaleDateString("pt-BR");
-const hora = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+const data = agora.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+const hora = agora.toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
 const numero = String(reserva.numero).padStart(2, "0");
 bot.sendMessage(TELEGRAM_TEAM_CHAT_ID,
   '\uD83C\uDFAF NOVA PARTICIPACAO - COPA TGJOGO\n\n' +
@@ -339,7 +339,7 @@ app.post("/api/confirmar", limiteConfirmar, async (req, res) => {
 
   if (!inscricoesAbertas) {
     return res.status(403).json({ ok: false, erro: "As inscrições estão encerradas." });
-  }  if (dataHoraSorteio && new Date() >= new Date(dataHoraSorteio)) {
+  }  if (dataHoraSorteio && new Date() >= new Date(dataHoraSorteio + '-03:00')) {
     return res.status(403).json({ ok: false, erro: "O prazo para participar encerrou." });
   }
 const numero = Number(req.body?.numero);
